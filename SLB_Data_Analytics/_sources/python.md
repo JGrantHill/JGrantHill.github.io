@@ -31,4 +31,4 @@ For the vast majority of my own basketball analytics, I use a Jupyter notebook w
 It is possible to use Jupyter notebooks with programming languages other than Python, but that's beyond the scope of this quick introduction.
 ```
 
-Several Chapters within this book are Jupyter notebooks that have been converted into a book/website form using [jupyter-book](https://jupyterbook.org/en/stable/intro.html).
+Several Chapters within this book are Jupyter notebooks that have been converted into a book/website form using [jupyter-book](https://jupyterbook.org/en/stable/intro.html), which I hope demonstrates how useful they can be.
