@@ -15,7 +15,10 @@ Another reason why Python sees a lot of use in analytics and data science is tha
 |:-----------|:--------------------------------------------------------------|
 | Pandas     | Used for working with data sets, a little like a spreadsheet. |
 | Matplotlib | For plotting graphs.                                          |
+| Requests   | Pulls (requests) HTML data for further processing |
+| Beautiful Soup | For pulling data out of HTML |
 | Selenium   | Tools for automating web-browser interactions.                |
+| Numpy      | Scientific computing library |
 
 ## Installing Python and Libraries
 
