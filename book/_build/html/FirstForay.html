@@ -436,7 +436,7 @@ document.write(`
 </div>
 </div>
 </div>
-<p>You may find it useful to take that “soup”, save it as a HTML file, and open it in a text editor. The next piece of code does that and will generate a file called <em>example-soup.html</em>.</p>
+<p>You may find it useful to take that “soup”, save it as a HTML file, and open it in a text editor. The next piece of code saves a file called <em>example-soup.html</em>.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">html</span> <span class="o">=</span> <span class="n">soup</span><span class="o">.</span><span class="n">prettify</span><span class="p">(</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span>
@@ -583,7 +583,7 @@ document.write(`
 </section>
 <section id="combine-the-lists-into-a-pandas-dataframe">
 <h3>Combine the lists into a Pandas dataframe<a class="headerlink" href="#combine-the-lists-into-a-pandas-dataframe" title="Link to this heading">#</a></h3>
-<p>Using Pandas with a little bit of numpy, we can easily squash all of the lists together into something that looks like a spreadsheet, known as a dataframe. It’s very common for a dataframe to be referred to as df. We set the df column names as we do this.</p>
+<p>Using Pandas, with a little bit of numpy, we can easily squash all of the lists together into something that looks like a spreadsheet, known as a dataframe. It’s very common for a dataframe to be referred to as df. We set the df column names as we do this.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">column_stack</span><span class="p">([</span><span class="n">name</span><span class="p">,</span> <span class="n">team</span><span class="p">,</span> <span class="n">games</span><span class="p">,</span> <span class="n">apg</span><span class="p">,</span> <span class="n">ap40</span><span class="p">,</span> <span class="n">topg</span><span class="p">,</span> <span class="n">top40</span><span class="p">]),</span> 
@@ -592,7 +592,7 @@ document.write(`
 </div>
 </div>
 </div>
-<p>If we then call this “df” Python object, it will show us the first few, and final few rows of the dataframe, skipping over ones in the middle.</p>
+<p>If we then call this “df” Python object, it will show us the first few, and final few rows of the dataframe, skipping over ones in the middle if the df is long.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">df</span>
@@ -690,6 +690,36 @@ document.write(`
     </tr>
     <tr>
       <th>93</th>
+      <td>Cole Long</td>
+      <td>NEW</td>
+      <td>2</td>
+      <td>0.00</td>
+      <td>0.00</td>
+      <td>1.50</td>
+      <td>5.18</td>
+    </tr>
+    <tr>
+      <th>94</th>
+      <td>Totonitoluwa Fagbenle</td>
+      <td>CAL</td>
+      <td>5</td>
+      <td>0.00</td>
+      <td>0.00</td>
+      <td>2.40</td>
+      <td>5.84</td>
+    </tr>
+    <tr>
+      <th>95</th>
+      <td>Greg Wild</td>
+      <td>CHE</td>
+      <td>2</td>
+      <td>0.00</td>
+      <td>0.00</td>
+      <td>0.00</td>
+      <td>0.00</td>
+    </tr>
+    <tr>
+      <th>96</th>
       <td>Alen Hadzibegovic</td>
       <td>LON</td>
       <td>1</td>
@@ -699,40 +729,10 @@ document.write(`
       <td>4.15</td>
     </tr>
     <tr>
-      <th>94</th>
+      <th>97</th>
       <td>Sauveur Kande</td>
       <td>NEW</td>
       <td>1</td>
-      <td>0.00</td>
-      <td>0.00</td>
-      <td>0.00</td>
-      <td>0.00</td>
-    </tr>
-    <tr>
-      <th>95</th>
-      <td>Pasquale Landolfi</td>
-      <td>BRI</td>
-      <td>4</td>
-      <td>0.00</td>
-      <td>0.00</td>
-      <td>0.00</td>
-      <td>0.00</td>
-    </tr>
-    <tr>
-      <th>96</th>
-      <td>Kieran Otabor</td>
-      <td>SUR</td>
-      <td>1</td>
-      <td>0.00</td>
-      <td>0.00</td>
-      <td>0.00</td>
-      <td>0.00</td>
-    </tr>
-    <tr>
-      <th>97</th>
-      <td>Remy Udeh</td>
-      <td>LON</td>
-      <td>2</td>
       <td>0.00</td>
       <td>0.00</td>
       <td>0.00</td>
@@ -748,7 +748,7 @@ document.write(`
 </section>
 <section id="filtering-and-analysis-of-the-data">
 <h2>Filtering and analysis of the data<a class="headerlink" href="#filtering-and-analysis-of-the-data" title="Link to this heading">#</a></h2>
-<p>Let’s assume we are looking for the players who are performing the best in terms of lots of assits while having low turnovers. We probably don’t want to include all 98 players that we extracted, so let’s start by keeping only the players who have played a minimum of three games (this is data from very early in the season). I then check the length of the resulting dataframe to see how many players remain.</p>
+<p>Let’s assume we are looking for the players who are performing the best in terms of lots of assists while having low turnovers. We probably don’t want to include all 98 players that we extracted, so let’s start by keeping only the players who have played a minimum of three games (this is data from very early in the season). I then check the length of the resulting dataframe to see how many players remain.</p>
 <p>We also need to ensure that the Games data is numeric, as otherwise Python may assume it is a string.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
@@ -994,7 +994,7 @@ document.write(`
 </table>
 </div></div></div>
 </div>
-<p>We can calculate a similar ratio but using the per 40 minutes stats instead. Note that we use the same function as the “per game” stats as it simply divides the two values.</p>
+<p>We can calculate a similar ratio but using the per 40 minutes stats instead. Mathematically, this should give the same ratio as the per game stats, but we will check that is the actual result. Note that we use the same function as the “per game” stats as it simply divides the two values.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;TOP40&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_numeric</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;TOP40&#39;</span><span class="p">])</span>
@@ -1024,7 +1024,7 @@ Name: AST:TO, dtype: float64
 </div>
 </div>
 </div>
-<p>We can see that while the average assists to turnovers, for this group of players who already have a lot of assists, is around 2.5, but one players has a frankly amazing 8.0 AST:TO. Let’s see who that is by asking for all rows where AST:TO is greater than 7.9 (to allow for any rounding errors)</p>
+<p>We can see that while the mean average assists to turnovers (for this group of players who already have a lot of assists) is around 2.5, but one player has a frankly amazing 8.0 AST:TO. Let’s see who that is by asking for all rows where AST:TO is greater than 7.9 (to allow for any rounding errors).</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;AST:TO&#39;</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mf">7.9</span><span class="p">]</span>
@@ -1100,12 +1100,12 @@ Name: AST40:TO40, dtype: float64
 </div>
 </div>
 </div>
-<p>The stats are really close to those per game, so maybe we don’t need to worry about this metric too much.</p>
-<p>To finish up, we can sort our dataframe by AST:TO to see who else is doing well, we can also then sort by APG and TOPG, just in case there are any ties. I have added a caption to the dataframe to make it look more like a table, and taken only the top 10 players by putting them into a new dataframe.</p>
+<p>The stats are really close to those per game - recall that mathematically the two ratios should be the same - with some slight differences that are presumably compound rounding errors. This means we can ignore this ratio and focus only on the AST:TO.</p>
+<p>To finish up, we can sort our dataframe by AST:TO to see which players are doing well, we can also then sort by AP40 and TOP40, just in case there are any ties. I have added a caption to the dataframe to make it look more like a table, and taken only the top 10 players by putting them into a new dataframe.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">df_top_10</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">nlargest</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="s1">&#39;AST:TO&#39;</span><span class="p">)</span>
-<span class="n">df_top_10</span> <span class="o">=</span> <span class="n">df_top_10</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="n">by</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;AST:TO&quot;</span><span class="p">,</span> <span class="s2">&quot;APG&quot;</span><span class="p">,</span> <span class="s2">&quot;TOPG&quot;</span><span class="p">],</span> <span class="n">ascending</span><span class="o">=</span><span class="p">[</span><span class="kc">False</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">True</span><span class="p">])</span>
+<span class="n">df_top_10</span> <span class="o">=</span> <span class="n">df_top_10</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="n">by</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;AST:TO&quot;</span><span class="p">,</span> <span class="s2">&quot;AP40&quot;</span><span class="p">,</span> <span class="s2">&quot;TOP40&quot;</span><span class="p">],</span> <span class="n">ascending</span><span class="o">=</span><span class="p">[</span><span class="kc">False</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">True</span><span class="p">])</span>
 <span class="n">df_top_10</span> <span class="o">=</span> <span class="n">df_top_10</span><span class="p">[[</span><span class="s2">&quot;Name&quot;</span><span class="p">,</span> <span class="s2">&quot;Team&quot;</span><span class="p">,</span> <span class="s2">&quot;Games&quot;</span><span class="p">,</span> <span class="s2">&quot;APG&quot;</span><span class="p">,</span> <span class="s2">&quot;AP40&quot;</span><span class="p">,</span> <span class="s2">&quot;TOPG&quot;</span><span class="p">,</span> <span class="s2">&quot;TOP40&quot;</span><span class="p">,</span> <span class="s2">&quot;AST:TO&quot;</span><span class="p">]]</span>
 <span class="n">df_top_10</span><span class="o">.</span><span class="n">style</span><span class="o">.</span><span class="n">format</span><span class="p">({</span><span class="s1">&#39;AST:TO&#39;</span><span class="p">:</span><span class="s1">&#39;</span><span class="si">{:.2}</span><span class="s1">&#39;</span><span class="p">})</span><span class="o">.</span><span class="n">set_caption</span><span class="p">(</span><span class="s1">&#39;SLB Assist to Turnover Leaders&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">set_table_styles</span><span class="p">([{</span>
     <span class="s1">&#39;selector&#39;</span><span class="p">:</span> <span class="s1">&#39;caption&#39;</span><span class="p">,</span>
@@ -1120,126 +1120,126 @@ Name: AST40:TO40, dtype: float64
 </div>
 <div class="cell_output docutils container">
 <div class="output text_html"><style type="text/css">
-#T_66fb2 caption {
+#T_474d2 caption {
   text-align: left;
   font-size: 18px;
   font-weight: bold;
 }
 </style>
-<table id="T_66fb2">
+<table id="T_474d2">
   <caption>SLB Assist to Turnover Leaders</caption>
   <thead>
     <tr>
-      <th id="T_66fb2_level0_col0" class="col_heading level0 col0" >Name</th>
-      <th id="T_66fb2_level0_col1" class="col_heading level0 col1" >Team</th>
-      <th id="T_66fb2_level0_col2" class="col_heading level0 col2" >Games</th>
-      <th id="T_66fb2_level0_col3" class="col_heading level0 col3" >APG</th>
-      <th id="T_66fb2_level0_col4" class="col_heading level0 col4" >AP40</th>
-      <th id="T_66fb2_level0_col5" class="col_heading level0 col5" >TOPG</th>
-      <th id="T_66fb2_level0_col6" class="col_heading level0 col6" >TOP40</th>
-      <th id="T_66fb2_level0_col7" class="col_heading level0 col7" >AST:TO</th>
+      <th id="T_474d2_level0_col0" class="col_heading level0 col0" >Name</th>
+      <th id="T_474d2_level0_col1" class="col_heading level0 col1" >Team</th>
+      <th id="T_474d2_level0_col2" class="col_heading level0 col2" >Games</th>
+      <th id="T_474d2_level0_col3" class="col_heading level0 col3" >APG</th>
+      <th id="T_474d2_level0_col4" class="col_heading level0 col4" >AP40</th>
+      <th id="T_474d2_level0_col5" class="col_heading level0 col5" >TOPG</th>
+      <th id="T_474d2_level0_col6" class="col_heading level0 col6" >TOP40</th>
+      <th id="T_474d2_level0_col7" class="col_heading level0 col7" >AST:TO</th>
     </tr>
   </thead>
   <tbody>
     <tr>
-      <td id="T_66fb2_row0_col0" class="data row0 col0" >Ali Youssouf Ali</td>
-      <td id="T_66fb2_row0_col1" class="data row0 col1" >MAN</td>
-      <td id="T_66fb2_row0_col2" class="data row0 col2" >4</td>
-      <td id="T_66fb2_row0_col3" class="data row0 col3" >4.000000</td>
-      <td id="T_66fb2_row0_col4" class="data row0 col4" >5.640000</td>
-      <td id="T_66fb2_row0_col5" class="data row0 col5" >0.500000</td>
-      <td id="T_66fb2_row0_col6" class="data row0 col6" >0.700000</td>
-      <td id="T_66fb2_row0_col7" class="data row0 col7" >8.0</td>
+      <td id="T_474d2_row0_col0" class="data row0 col0" >Ali Youssouf Ali</td>
+      <td id="T_474d2_row0_col1" class="data row0 col1" >MAN</td>
+      <td id="T_474d2_row0_col2" class="data row0 col2" >4</td>
+      <td id="T_474d2_row0_col3" class="data row0 col3" >4.000000</td>
+      <td id="T_474d2_row0_col4" class="data row0 col4" >5.640000</td>
+      <td id="T_474d2_row0_col5" class="data row0 col5" >0.500000</td>
+      <td id="T_474d2_row0_col6" class="data row0 col6" >0.700000</td>
+      <td id="T_474d2_row0_col7" class="data row0 col7" >8.0</td>
     </tr>
     <tr>
-      <td id="T_66fb2_row1_col0" class="data row1 col0" >Patrick Whelan</td>
-      <td id="T_66fb2_row1_col1" class="data row1 col1" >CAL</td>
-      <td id="T_66fb2_row1_col2" class="data row1 col2" >3</td>
-      <td id="T_66fb2_row1_col3" class="data row1 col3" >5.330000</td>
-      <td id="T_66fb2_row1_col4" class="data row1 col4" >7.250000</td>
-      <td id="T_66fb2_row1_col5" class="data row1 col5" >1.330000</td>
-      <td id="T_66fb2_row1_col6" class="data row1 col6" >1.810000</td>
-      <td id="T_66fb2_row1_col7" class="data row1 col7" >4.0</td>
+      <td id="T_474d2_row1_col0" class="data row1 col0" >Patrick Whelan</td>
+      <td id="T_474d2_row1_col1" class="data row1 col1" >CAL</td>
+      <td id="T_474d2_row1_col2" class="data row1 col2" >3</td>
+      <td id="T_474d2_row1_col3" class="data row1 col3" >5.330000</td>
+      <td id="T_474d2_row1_col4" class="data row1 col4" >7.250000</td>
+      <td id="T_474d2_row1_col5" class="data row1 col5" >1.330000</td>
+      <td id="T_474d2_row1_col6" class="data row1 col6" >1.810000</td>
+      <td id="T_474d2_row1_col7" class="data row1 col7" >4.0</td>
     </tr>
     <tr>
-      <td id="T_66fb2_row2_col0" class="data row2 col0" >Jordan Spencer</td>
-      <td id="T_66fb2_row2_col1" class="data row2 col1" >NEW</td>
-      <td id="T_66fb2_row2_col2" class="data row2 col2" >5</td>
-      <td id="T_66fb2_row2_col3" class="data row2 col3" >3.400000</td>
-      <td id="T_66fb2_row2_col4" class="data row2 col4" >5.690000</td>
-      <td id="T_66fb2_row2_col5" class="data row2 col5" >1.200000</td>
-      <td id="T_66fb2_row2_col6" class="data row2 col6" >2.010000</td>
-      <td id="T_66fb2_row2_col7" class="data row2 col7" >2.8</td>
+      <td id="T_474d2_row2_col0" class="data row2 col0" >Jordan Spencer</td>
+      <td id="T_474d2_row2_col1" class="data row2 col1" >NEW</td>
+      <td id="T_474d2_row2_col2" class="data row2 col2" >5</td>
+      <td id="T_474d2_row2_col3" class="data row2 col3" >3.400000</td>
+      <td id="T_474d2_row2_col4" class="data row2 col4" >5.690000</td>
+      <td id="T_474d2_row2_col5" class="data row2 col5" >1.200000</td>
+      <td id="T_474d2_row2_col6" class="data row2 col6" >2.010000</td>
+      <td id="T_474d2_row2_col7" class="data row2 col7" >2.8</td>
     </tr>
     <tr>
-      <td id="T_66fb2_row3_col0" class="data row3 col0" >Isaiah Hill</td>
-      <td id="T_66fb2_row3_col1" class="data row3 col1" >CAL</td>
-      <td id="T_66fb2_row3_col2" class="data row3 col2" >5</td>
-      <td id="T_66fb2_row3_col3" class="data row3 col3" >6.400000</td>
-      <td id="T_66fb2_row3_col4" class="data row3 col4" >8.770000</td>
-      <td id="T_66fb2_row3_col5" class="data row3 col5" >2.400000</td>
-      <td id="T_66fb2_row3_col6" class="data row3 col6" >3.290000</td>
-      <td id="T_66fb2_row3_col7" class="data row3 col7" >2.7</td>
+      <td id="T_474d2_row3_col0" class="data row3 col0" >Isaiah Hill</td>
+      <td id="T_474d2_row3_col1" class="data row3 col1" >CAL</td>
+      <td id="T_474d2_row3_col2" class="data row3 col2" >5</td>
+      <td id="T_474d2_row3_col3" class="data row3 col3" >6.400000</td>
+      <td id="T_474d2_row3_col4" class="data row3 col4" >8.770000</td>
+      <td id="T_474d2_row3_col5" class="data row3 col5" >2.400000</td>
+      <td id="T_474d2_row3_col6" class="data row3 col6" >3.290000</td>
+      <td id="T_474d2_row3_col7" class="data row3 col7" >2.7</td>
     </tr>
     <tr>
-      <td id="T_66fb2_row4_col0" class="data row4 col0" >Prentiss Nixon</td>
-      <td id="T_66fb2_row4_col1" class="data row4 col1" >SHE</td>
-      <td id="T_66fb2_row4_col2" class="data row4 col2" >4</td>
-      <td id="T_66fb2_row4_col3" class="data row4 col3" >6.500000</td>
-      <td id="T_66fb2_row4_col4" class="data row4 col4" >8.260000</td>
-      <td id="T_66fb2_row4_col5" class="data row4 col5" >2.500000</td>
-      <td id="T_66fb2_row4_col6" class="data row4 col6" >3.180000</td>
-      <td id="T_66fb2_row4_col7" class="data row4 col7" >2.6</td>
+      <td id="T_474d2_row4_col0" class="data row4 col0" >Prentiss Nixon</td>
+      <td id="T_474d2_row4_col1" class="data row4 col1" >SHE</td>
+      <td id="T_474d2_row4_col2" class="data row4 col2" >4</td>
+      <td id="T_474d2_row4_col3" class="data row4 col3" >6.500000</td>
+      <td id="T_474d2_row4_col4" class="data row4 col4" >8.260000</td>
+      <td id="T_474d2_row4_col5" class="data row4 col5" >2.500000</td>
+      <td id="T_474d2_row4_col6" class="data row4 col6" >3.180000</td>
+      <td id="T_474d2_row4_col7" class="data row4 col7" >2.6</td>
     </tr>
     <tr>
-      <td id="T_66fb2_row5_col0" class="data row5 col0" >Cameron Holden</td>
-      <td id="T_66fb2_row5_col1" class="data row5 col1" >CHE</td>
-      <td id="T_66fb2_row5_col2" class="data row5 col2" >4</td>
-      <td id="T_66fb2_row5_col3" class="data row5 col3" >4.750000</td>
-      <td id="T_66fb2_row5_col4" class="data row5 col4" >6.710000</td>
-      <td id="T_66fb2_row5_col5" class="data row5 col5" >2.000000</td>
-      <td id="T_66fb2_row5_col6" class="data row5 col6" >2.830000</td>
-      <td id="T_66fb2_row5_col7" class="data row5 col7" >2.4</td>
+      <td id="T_474d2_row5_col0" class="data row5 col0" >Cameron Holden</td>
+      <td id="T_474d2_row5_col1" class="data row5 col1" >CHE</td>
+      <td id="T_474d2_row5_col2" class="data row5 col2" >4</td>
+      <td id="T_474d2_row5_col3" class="data row5 col3" >4.750000</td>
+      <td id="T_474d2_row5_col4" class="data row5 col4" >6.710000</td>
+      <td id="T_474d2_row5_col5" class="data row5 col5" >2.000000</td>
+      <td id="T_474d2_row5_col6" class="data row5 col6" >2.830000</td>
+      <td id="T_474d2_row5_col7" class="data row5 col7" >2.4</td>
     </tr>
     <tr>
-      <td id="T_66fb2_row6_col0" class="data row6 col0" >Nicholas Lewis</td>
-      <td id="T_66fb2_row6_col1" class="data row6 col1" >MAN</td>
-      <td id="T_66fb2_row6_col2" class="data row6 col2" >4</td>
-      <td id="T_66fb2_row6_col3" class="data row6 col3" >3.750000</td>
-      <td id="T_66fb2_row6_col4" class="data row6 col4" >6.400000</td>
-      <td id="T_66fb2_row6_col5" class="data row6 col5" >2.000000</td>
-      <td id="T_66fb2_row6_col6" class="data row6 col6" >3.410000</td>
-      <td id="T_66fb2_row6_col7" class="data row6 col7" >1.9</td>
+      <td id="T_474d2_row6_col0" class="data row6 col0" >Nicholas Lewis</td>
+      <td id="T_474d2_row6_col1" class="data row6 col1" >MAN</td>
+      <td id="T_474d2_row6_col2" class="data row6 col2" >4</td>
+      <td id="T_474d2_row6_col3" class="data row6 col3" >3.750000</td>
+      <td id="T_474d2_row6_col4" class="data row6 col4" >6.400000</td>
+      <td id="T_474d2_row6_col5" class="data row6 col5" >2.000000</td>
+      <td id="T_474d2_row6_col6" class="data row6 col6" >3.410000</td>
+      <td id="T_474d2_row6_col7" class="data row6 col7" >1.9</td>
     </tr>
     <tr>
-      <td id="T_66fb2_row7_col0" class="data row7 col0" >Kedrian Johnson</td>
-      <td id="T_66fb2_row7_col1" class="data row7 col1" >BRI</td>
-      <td id="T_66fb2_row7_col2" class="data row7 col2" >4</td>
-      <td id="T_66fb2_row7_col3" class="data row7 col3" >5.250000</td>
-      <td id="T_66fb2_row7_col4" class="data row7 col4" >6.720000</td>
-      <td id="T_66fb2_row7_col5" class="data row7 col5" >3.000000</td>
-      <td id="T_66fb2_row7_col6" class="data row7 col6" >3.840000</td>
-      <td id="T_66fb2_row7_col7" class="data row7 col7" >1.8</td>
+      <td id="T_474d2_row7_col0" class="data row7 col0" >Kedrian Johnson</td>
+      <td id="T_474d2_row7_col1" class="data row7 col1" >BRI</td>
+      <td id="T_474d2_row7_col2" class="data row7 col2" >4</td>
+      <td id="T_474d2_row7_col3" class="data row7 col3" >5.250000</td>
+      <td id="T_474d2_row7_col4" class="data row7 col4" >6.720000</td>
+      <td id="T_474d2_row7_col5" class="data row7 col5" >3.000000</td>
+      <td id="T_474d2_row7_col6" class="data row7 col6" >3.840000</td>
+      <td id="T_474d2_row7_col7" class="data row7 col7" >1.8</td>
     </tr>
     <tr>
-      <td id="T_66fb2_row8_col0" class="data row8 col0" >Jordan Taylor</td>
-      <td id="T_66fb2_row8_col1" class="data row8 col1" >LON</td>
-      <td id="T_66fb2_row8_col2" class="data row8 col2" >3</td>
-      <td id="T_66fb2_row8_col3" class="data row8 col3" >4.000000</td>
-      <td id="T_66fb2_row8_col4" class="data row8 col4" >5.620000</td>
-      <td id="T_66fb2_row8_col5" class="data row8 col5" >2.330000</td>
-      <td id="T_66fb2_row8_col6" class="data row8 col6" >3.280000</td>
-      <td id="T_66fb2_row8_col7" class="data row8 col7" >1.7</td>
+      <td id="T_474d2_row8_col0" class="data row8 col0" >Jordan Taylor</td>
+      <td id="T_474d2_row8_col1" class="data row8 col1" >LON</td>
+      <td id="T_474d2_row8_col2" class="data row8 col2" >3</td>
+      <td id="T_474d2_row8_col3" class="data row8 col3" >4.000000</td>
+      <td id="T_474d2_row8_col4" class="data row8 col4" >5.620000</td>
+      <td id="T_474d2_row8_col5" class="data row8 col5" >2.330000</td>
+      <td id="T_474d2_row8_col6" class="data row8 col6" >3.280000</td>
+      <td id="T_474d2_row8_col7" class="data row8 col7" >1.7</td>
     </tr>
     <tr>
-      <td id="T_66fb2_row9_col0" class="data row9 col0" >Ricky Clemons</td>
-      <td id="T_66fb2_row9_col1" class="data row9 col1" >CHE</td>
-      <td id="T_66fb2_row9_col2" class="data row9 col2" >4</td>
-      <td id="T_66fb2_row9_col3" class="data row9 col3" >3.250000</td>
-      <td id="T_66fb2_row9_col4" class="data row9 col4" >4.860000</td>
-      <td id="T_66fb2_row9_col5" class="data row9 col5" >2.000000</td>
-      <td id="T_66fb2_row9_col6" class="data row9 col6" >2.990000</td>
-      <td id="T_66fb2_row9_col7" class="data row9 col7" >1.6</td>
+      <td id="T_474d2_row9_col0" class="data row9 col0" >Ricky Clemons</td>
+      <td id="T_474d2_row9_col1" class="data row9 col1" >CHE</td>
+      <td id="T_474d2_row9_col2" class="data row9 col2" >4</td>
+      <td id="T_474d2_row9_col3" class="data row9 col3" >3.250000</td>
+      <td id="T_474d2_row9_col4" class="data row9 col4" >4.860000</td>
+      <td id="T_474d2_row9_col5" class="data row9 col5" >2.000000</td>
+      <td id="T_474d2_row9_col6" class="data row9 col6" >2.990000</td>
+      <td id="T_474d2_row9_col7" class="data row9 col7" >1.6</td>
     </tr>
   </tbody>
 </table>
