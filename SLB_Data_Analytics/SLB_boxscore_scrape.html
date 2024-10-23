@@ -357,7 +357,9 @@ document.write(`
   </button>
 `);
 </script>
-
+<button class="sidebar-toggle secondary-toggle btn btn-sm" title="Toggle secondary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="fa-solid fa-list"></span>
+</button>
 </div></div>
       
     </div>
@@ -373,6 +375,18 @@ document.write(`
     <div id="print-main-content">
         <div id="jb-print-toc">
             
+            <div>
+                <h2> Contents </h2>
+            </div>
+            <nav aria-label="Page">
+                <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#scraping-the-url-data-we-need">Scraping the URL data we need</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#exercise">Exercise</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#scraping-the-box-score-data">Scraping the box score data</a></li>
+</ul>
+            </nav>
         </div>
     </div>
 </div>
@@ -384,30 +398,38 @@ document.write(`
                   
   <section class="tex2jax_ignore mathjax_ignore" id="slb-boxscore-data-scrape">
 <h1>SLB boxscore data scrape<a class="headerlink" href="#slb-boxscore-data-scrape" title="Link to this heading">#</a></h1>
-<p>Extracts the data from each individual game and saves the boxscores in CSV format</p>
-<p>First we need to load/import the various Python module we need to do this. I have added comments to give some indication of what the modules do.</p>
-<p>If you have not used selenium with Chrome before, you will probably need to download and install <a class="reference external" href="https://googlechromelabs.github.io/chrome-for-testing/">Chrome for Testing</a></p>
+<p>In this Chapter our aim is to produce comma-separated values files containing the box scores for games that have been played in the Women’s Super League Basketball. It will be conducted in two main steps:</p>
+<ol class="arabic simple">
+<li><p>Scrape the data we need to access the web page for each game’s box score.</p></li>
+<li><p>Scrape the box score data for each game and save it as a CSV.</p></li>
+</ol>
+<p>As we are accessing data from Javascript heavy websites we will use the selenium package to automate control of a web browser. You can find more information on this in the Chapter on <a class="reference internal" href="JavascriptScrape.html"><span class="std std-doc">Scraping Javascript heavy websites</span></a>. If you have not used selenium with Chrome before, you will probably need to download and install <a class="reference external" href="https://googlechromelabs.github.io/chrome-for-testing/">Chrome for Testing</a>.</p>
+<p>We will need to run the same process for each game in terms of scraping the boxscores, so we will define Python functions that we can call repeatedly.</p>
+<section id="scraping-the-url-data-we-need">
+<h2>Scraping the URL data we need<a class="headerlink" href="#scraping-the-url-data-we-need" title="Link to this heading">#</a></h2>
+<p>The Women’s Super League Basketball website has a <a class="reference external" href="https://www.superleaguebasketballw.co.uk/livestats/">livestats page</a> that contains all of the game final scores (and current scores for any games in progress). There is also a link to more information for each game, and it is those links that we are trying to obtain.</p>
+<p>As usual, the first thing we will do is import the Python libraries and packages that we will need.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span> <span class="c1"># This allows us to manipulate dates</span>
-<span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span> <span class="c1"># For checking if folders/directories exist and creating them</span>
-<span class="kn">import</span> <span class="nn">requests</span> <span class="c1"># For simple access to web pages</span>
-<span class="kn">import</span> <span class="nn">time</span> <span class="c1"># We&#39;re going to use this to pause the web browser for a couple of seconds</span>
-<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span> <span class="c1"># For creating dataframes / CSV files</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span> <span class="c1"># Numerical manipulations</span>
-<span class="kn">import</span> <span class="nn">re</span> <span class="c1"># For regular expressions - allows us to search with wildcards</span>
-<span class="kn">from</span> <span class="nn">bs4</span> <span class="kn">import</span> <span class="n">BeautifulSoup</span> <span class="c1"># For messing around with the data from web pages</span>
-<span class="kn">from</span> <span class="nn">selenium</span> <span class="kn">import</span> <span class="n">webdriver</span> <span class="c1"># Automates using Chrome to access more complex web pages.</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span> 
+<span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span> 
+<span class="kn">import</span> <span class="nn">requests</span> 
+<span class="kn">import</span> <span class="nn">time</span> 
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span> 
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span> 
+<span class="kn">import</span> <span class="nn">re</span>
+<span class="kn">from</span> <span class="nn">bs4</span> <span class="kn">import</span> <span class="n">BeautifulSoup</span>
+<span class="kn">from</span> <span class="nn">selenium</span> <span class="kn">import</span> <span class="n">webdriver</span>
 </pre></div>
 </div>
 </div>
 </div>
-<p>Lets grab the HTML from the SLB livestats page. We can use this to figure out where all of the boxscore information is kept. This will automatically open Chrome and should close it again.</p>
+<p>The next code cell opens the livestats URL using the Chrome webbrowser (a new window should open if you run the code), the necessary HTML is placed into “soup”, and the browser window should automatically close.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">results_url</span> <span class="o">=</span> <span class="s2">&quot;https://www.superleaguebasketballm.co.uk/livestats/&quot;</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">livestats_url</span> <span class="o">=</span> <span class="s2">&quot;https://www.superleaguebasketballw.co.uk/livestats/&quot;</span>
 <span class="n">driver</span> <span class="o">=</span> <span class="n">webdriver</span><span class="o">.</span><span class="n">Chrome</span><span class="p">()</span>
-<span class="n">page</span> <span class="o">=</span> <span class="n">driver</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">results_url</span><span class="p">)</span>
+<span class="n">page</span> <span class="o">=</span> <span class="n">driver</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">livestats_url</span><span class="p">)</span>
 <span class="n">driver</span><span class="o">.</span><span class="n">switch_to</span><span class="o">.</span><span class="n">frame</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
 <span class="n">results_soup</span> <span class="o">=</span> <span class="n">BeautifulSoup</span><span class="p">(</span><span class="n">driver</span><span class="o">.</span><span class="n">page_source</span><span class="p">,</span> <span class="s1">&#39;html&#39;</span><span class="p">)</span>
 <span class="n">driver</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
@@ -415,9 +437,9 @@ document.write(`
 </div>
 </div>
 </div>
-<p>Now we want to extract all of the URLs for the games that have been played (it skips over any that currently have the score listed as ‘Upcoming’).</p>
-<p>If we wanted to extract only the data for a specific competition, then we can uncomment the lines that include `comp_string’.</p>
-<div class="cell docutils container">
+<p>All of the pertinent information is held in a HTML table (if necessary, you can download and inspect the website HTML to verify this), and games which have not yet been played have the text “Upcoming” rather than a score. The following piece of code extracts the game URLs as a list that we can process further.</p>
+<div class="alert alert-block alert-info">
+<b>Note:</b> if we wanted to extract only the information for certain competitions (such as the Championship), we can add this a form of filter. The code which has been commented out will help with that.</div><div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">tables</span> <span class="o">=</span> <span class="n">results_soup</span><span class="o">.</span><span class="n">find_all</span><span class="p">(</span><span class="s1">&#39;table&#39;</span><span class="p">)</span>
 <span class="c1">#comp_string = &#39;Championship 2024-25&#39;</span>
@@ -433,14 +455,51 @@ document.write(`
 </div>
 </div>
 </div>
+<p>Let’s check how many game URLs we have extracted.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">len</span><span class="p">(</span><span class="n">url_soup</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>17
+</pre></div>
+</div>
+</div>
+</div>
+<p>Rather than taking all 17 games, we can take just the first 10 by taking a slice of the list (this reduces the time taken to run all of the code, if you want information on more games then this can be easily modified. We can also take a peek at what the list of URLs looks like.</p>
 <p>We can use the SLB URLs gethered above to directly access the FIBA live stats. This next cell makes a list of the live stats URLs for all of the games identified above.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">url_soup</span> <span class="o">=</span> <span class="n">url_soup</span><span class="p">[:</span><span class="mi">10</span><span class="p">]</span>
+<span class="n">url_soup</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>[&#39;http://www.fibalivestats.com/webcast/wbbl/2522426/&#39;,
+ &#39;http://www.fibalivestats.com/webcast/wbbl/2522423/&#39;,
+ &#39;http://www.fibalivestats.com/webcast/wbbl/2522421/&#39;,
+ &#39;http://www.fibalivestats.com/webcast/wbbl/2522427/&#39;,
+ &#39;http://www.fibalivestats.com/webcast/wbbl/2522424/&#39;,
+ &#39;http://www.fibalivestats.com/webcast/wbbl/2522419/&#39;,
+ &#39;http://www.fibalivestats.com/webcast/wbbl/2522422/&#39;,
+ &#39;http://www.fibalivestats.com/webcast/wbbl/2522417/&#39;,
+ &#39;http://www.fibalivestats.com/webcast/wbbl/2538198/&#39;,
+ &#39;http://www.fibalivestats.com/webcast/wbbl/2522428/&#39;]
+</pre></div>
+</div>
+</div>
+</div>
+<p>We can now assemble the URL required to access the box scores and check that the website exists (more technically, than the URL resolves).</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">game_id</span> <span class="o">=</span> <span class="p">[]</span>
 <span class="k">for</span> <span class="n">url</span> <span class="ow">in</span> <span class="n">url_soup</span><span class="p">:</span>
     <span class="n">game_id</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">url</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">)[</span><span class="mi">5</span><span class="p">])</span>
 
-<span class="n">league</span> <span class="o">=</span> <span class="s1">&#39;SLB&#39;</span>
+<span class="n">league</span> <span class="o">=</span> <span class="s1">&#39;WBBL&#39;</span>
 <span class="n">baseurl</span> <span class="o">=</span> <span class="s1">&#39;https://www.fibalivestats.com/u/</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">league</span><span class="p">)</span>
 <span class="n">games</span> <span class="o">=</span> <span class="p">[]</span>
 
@@ -456,7 +515,38 @@ document.write(`
 </div>
 </div>
 </div>
-<p>We now define some functions that work with the live stats URLs to scrape all of the boxscore data and save the data as CSV.</p>
+<p>The URLs we will access can be inspected.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">games</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>[&#39;https://www.fibalivestats.com/u/WBBL/2522426/&#39;,
+ &#39;https://www.fibalivestats.com/u/WBBL/2522423/&#39;,
+ &#39;https://www.fibalivestats.com/u/WBBL/2522421/&#39;,
+ &#39;https://www.fibalivestats.com/u/WBBL/2522427/&#39;,
+ &#39;https://www.fibalivestats.com/u/WBBL/2522424/&#39;,
+ &#39;https://www.fibalivestats.com/u/WBBL/2522419/&#39;,
+ &#39;https://www.fibalivestats.com/u/WBBL/2522422/&#39;,
+ &#39;https://www.fibalivestats.com/u/WBBL/2522417/&#39;,
+ &#39;https://www.fibalivestats.com/u/WBBL/2538198/&#39;,
+ &#39;https://www.fibalivestats.com/u/WBBL/2522428/&#39;]
+</pre></div>
+</div>
+</div>
+</div>
+<section id="exercise">
+<h3>Exercise<a class="headerlink" href="#exercise" title="Link to this heading">#</a></h3>
+<p>After inspecting the livestats page in a web browser to help you decide what to do, modify the code so that you only obtain the URLs for the first four games played in the 2024-25 version of the Betty Codona Trophy.</p>
+</section>
+</section>
+<section id="scraping-the-box-score-data">
+<h2>Scraping the box score data<a class="headerlink" href="#scraping-the-box-score-data" title="Link to this heading">#</a></h2>
+<p>Now that we have the URLs, we need to scrape the box score for each one of those. As we are essentially repeating the same exercise multiple times, we will define some functions that we will repeat for each URL.</p>
+<p>The first function is one that takes a URL soup object as input, creates some internal lists of data, then returns the data as a dataframe. To make creating filenames for CSV files easier, the same function also returns the names of the teams that played and the date the game was played.</p>
+<p>As we are just defining the function, running the next cell of code doesn’t actually do anything at this point. Note, that this function should work for any FIBA livestats page, not just Women’s SLB - assuming that the page contains all of the stats we are looking for.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">stats_to_df</span><span class="p">(</span><span class="n">soup</span><span class="p">):</span>
@@ -546,7 +636,10 @@ document.write(`
 </div>
 </div>
 </div>
-<div class="cell docutils container">
+<p>This next function takes a game URL from above, adds the extra part to the URL required to access the boxscore, then uses Selenium and Chrome to scrape the page into BeautifulSoup.</p>
+<div class="alert alert-block alert-info">
+<b>Note:</b> I ask the web browser to wait (sleep) for 2 seconds after opening the page as sometimes it can take a while for all of the Javascript to load. It should be possible to do this with Selenium, but I have never been able to get it to work correctly with the FIBA pages.
+</div><div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">fiba_url_to_soup</span><span class="p">(</span><span class="n">game</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Takes the base FIBA livestats URL, adds the extra info to request the boxscore, then returns the pagesoup&quot;&quot;&quot;</span>
@@ -562,6 +655,8 @@ document.write(`
 </div>
 </div>
 </div>
+<p>We also need a function to export the dataframe as a CSV file.</p>
+<p>The filename for the CSV is automatically assembled from the team names and date data we extracted earlier. We can optionally also ask for the CSV files to be saved into a specific directory/folder.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">save_game_csv</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">teams</span><span class="p">,</span> <span class="n">date</span><span class="p">,</span> <span class="n">directory</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
@@ -580,7 +675,8 @@ document.write(`
 </div>
 </div>
 </div>
-<p>The next cell does the work of scraping the data and saving to CSV for each game identified above. Please note that it will launch a Chrome window (and eventually close it) for every game.</p>
+<p>With the functions defined, we now need to run all three of them for each of the games we identified above. Please note that it will launch a Chrome window (and eventually close it) for every game, so it can take a while if you’re asking for a lot of games to be scraped.</p>
+<p>The CSV files should be saved in a directory called “data”.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">for</span> <span class="n">game</span> <span class="ow">in</span> <span class="n">games</span><span class="p">:</span>
@@ -591,7 +687,8 @@ document.write(`
 </div>
 </div>
 </div>
-<p>We should now have a separate CSV for each game that has been played, all in the directory called data. Processing and analysing the data will take place in a separate notebook.</p>
+<p>We should now have a separate CSV for each game that has been played, all in the directory called data. These CSV files can be opened in most spreadsheet software, or we can read it in to Pandas dataframes for further processing.</p>
+</section>
 </section>
 
     <script type="text/x-thebe-config">
@@ -648,6 +745,25 @@ document.write(`
             </div>
             
             
+              
+                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+  <div class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> Contents
+  </div>
+  <nav class="bd-toc-nav page-toc">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#scraping-the-url-data-we-need">Scraping the URL data we need</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#exercise">Exercise</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#scraping-the-box-score-data">Scraping the box score data</a></li>
+</ul>
+  </nav></div>
+
+</div></div>
               
             
           </div>
