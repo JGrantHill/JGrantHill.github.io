@@ -44,7 +44,7 @@ It is up to you to evaluate the code, and this is especially the case if you mak
 
 ## Recent Changes
 
-- Initial version of the site, mostly me learning how to use jupyter-book to make a website/book.
+- Initial version of the site, with most of the content focused on scraping data from websites.
 
 ## Want to Work Together on this Book?
 
@@ -52,4 +52,15 @@ If you'd like to contribute to this book, please get in touch. I'm happy to have
 
 ## Planned Future Updates
 
+- Working with box score data to calculate more advanced stats.
 - Scraping team efficiency data from BritHoops and analysing it via plots.
+
+## Acknowledgements
+
+I'd like to thank a few people for their support and encouragement in producing this online book:
+
+- All of the folks on the BTR (Below The Rim) Discord for feedback on my SLB infographics and giving my head a wobble when I made mistakes. In particular, huge thanks are given to Louie for taking a look at an early version of this book and giving me extra encouragement to continue with it.
+- My buddy Tom from [At The Buzzer UK](https://www.atthebuzzeruk.co.uk) for always encouraging me to explore stats and analytics. This man's love of all things basketball is infectious.
+- My family (Anna, Freya & Gregor) for putting up with me hammering away on a laptop during evenings and weekends.
+
+

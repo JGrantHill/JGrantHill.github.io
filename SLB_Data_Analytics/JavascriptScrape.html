@@ -357,7 +357,9 @@ document.write(`
   </button>
 `);
 </script>
-
+<button class="sidebar-toggle secondary-toggle btn btn-sm" title="Toggle secondary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="fa-solid fa-list"></span>
+</button>
 </div></div>
       
     </div>
@@ -373,6 +375,19 @@ document.write(`
     <div id="print-main-content">
         <div id="jb-print-toc">
             
+            <div>
+                <h2> Contents </h2>
+            </div>
+            <nav aria-label="Page">
+                <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#accessing-the-correct-html-data">Accessing the correct HTML data</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#extracting-the-information-we-want-from-the-html">Extracting the information we want from the HTML</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#create-a-table-based-on-the-results">Create a table based on the results</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#exercises">Exercises</a></li>
+</ul>
+</li>
+</ul>
+            </nav>
         </div>
     </div>
 </div>
@@ -385,7 +400,738 @@ document.write(`
   <section class="tex2jax_ignore mathjax_ignore" id="scraping-javascript-heavy-websites">
 <h1>Scraping Javascript heavy websites<a class="headerlink" href="#scraping-javascript-heavy-websites" title="Link to this heading">#</a></h1>
 <p>Unlike BritHoops, some websites make extensive use of Javascript for additional functionality, making it difficult to use the “requests” library to extract the data we want.</p>
-<p>This work in progress Chapter will demonstrate how to go about scraping data from such sites.</p>
+<p>In this Chapter, our aim is to extract the results of the games played this far in the Men’s SLB, which can be found on the <a class="reference external" href="https://www.superleaguebasketballm.co.uk/livestats/">livestats page</a>. Once we have the data we want, we will process it and produce a table of the results from the Trophy competition.</p>
+<div class="alert alert-block alert-info">
+<b>Note:</b> The actual SLB Trophy competition was divided into North and South pools, so a combined table isn't reflective of the actual competition. However, one of the beauties of scraping and processing data is that we can produce some fictional "what-ifs" to explore"</div>
+<p>Here’s a cropped screenshot of the livestats page so that you can see what it looks like:</p>
+<p><img alt="Screenshot of the livestats page" src="_images/livestats.png" /></p>
+<p>As you can see, this data is almost certainly found in a table somewhere within the HTML.</p>
+<section id="accessing-the-correct-html-data">
+<h2>Accessing the correct HTML data<a class="headerlink" href="#accessing-the-correct-html-data" title="Link to this heading">#</a></h2>
+<p>As a first attempt we can try scraping the HTML from livestats with requests and Beautiful Soup, in much the same way as we did for our <a class="reference internal" href="FirstForay.html"><span class="std std-doc">First Foray into Data Scraping</span></a>.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">requests</span>
+<span class="kn">from</span> <span class="nn">bs4</span> <span class="kn">import</span> <span class="n">BeautifulSoup</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>Due to the way that the livestats page serves up its HTML, we need to pass an extra option to requests too - this means it will ignore any untrusted SSL certificates. This is a minor security risk, so should be avoided where possible and you are likely to recieve a Python warning when running it.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">livestats_url</span> <span class="o">=</span> <span class="s1">&#39;https://www.superleaguebasketballm.co.uk/livestats/&#39;</span>
+<span class="n">page</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">livestats_url</span><span class="p">,</span> <span class="n">verify</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="n">soup</span> <span class="o">=</span> <span class="n">BeautifulSoup</span><span class="p">(</span><span class="n">page</span><span class="o">.</span><span class="n">content</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>/Users/ch1jgh/miniforge3/envs/bball-analytics/lib/python3.12/site-packages/urllib3/connectionpool.py:1099: InsecureRequestWarning: Unverified HTTPS request is being made to host &#39;www.superleaguebasketballm.co.uk&#39;. Adding certificate verification is strongly advised. See: https://urllib3.readthedocs.io/en/latest/advanced-usage.html#tls-warnings
+  warnings.warn(
+</pre></div>
+</div>
+</div>
+</div>
+<p>If you save the HTML soup to a file and inspect it, you’ll see it is much more complex that what we saw with BritHoops. We can persist with this and try to extract any HTML tables from the soup.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">tables</span> <span class="o">=</span> <span class="n">soup</span><span class="o">.</span><span class="n">find_all</span><span class="p">(</span><span class="s1">&#39;table&#39;</span><span class="p">)</span>
+<span class="nb">len</span><span class="p">(</span><span class="n">tables</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>0
+</pre></div>
+</div>
+</div>
+</div>
+<p>Hmm, it appears that are no HTML tables available in the soup we scraped. One of the reasons for this is that the webpage is using <a class="reference external" href="https://www.w3schools.com/html/html_iframe.asp">iframes</a>, which makes grabbing the data more difficult as it’s effectively a webpage within a webpage.</p>
+<p>We are going to change our approach here and automate the use of a web browser to extract the information we want. The <a class="reference external" href="https://www.simplilearn.com/tutorials/python-tutorial/selenium-with-python#:~:text=Selenium%20with%20Python%20is%20used,skimming%20the%20entire%20site%2C%20etc.">selenium Python package</a> allows us to do this with a variety of browsers, but I am going to use the Google Chrome browser, along with the <a class="reference external" href="https://googlechromelabs.github.io/chrome-for-testing/">Chrome for testing</a> program.</p>
+<p>The next code cell imports what we need from selenium, asks it to use the Chrome browser, opens the livestats URL (a Chrome window should pop up if you run this code), switches to the second iframe on the webpage, scrapes the HTML from said iframe, then closes the broswer window.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">selenium</span> <span class="kn">import</span> <span class="n">webdriver</span>
+
+<span class="n">driver</span> <span class="o">=</span> <span class="n">webdriver</span><span class="o">.</span><span class="n">Chrome</span><span class="p">()</span>
+<span class="n">page</span> <span class="o">=</span> <span class="n">driver</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">livestats_url</span><span class="p">)</span>
+<span class="n">driver</span><span class="o">.</span><span class="n">switch_to</span><span class="o">.</span><span class="n">frame</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">results_soup</span> <span class="o">=</span> <span class="n">BeautifulSoup</span><span class="p">(</span><span class="n">driver</span><span class="o">.</span><span class="n">page_source</span><span class="p">,</span> <span class="s1">&#39;html&#39;</span><span class="p">)</span>
+<span class="n">driver</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>Let’s try extracting any HTML tables again, and see how many we get.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">tables</span> <span class="o">=</span> <span class="n">results_soup</span><span class="o">.</span><span class="n">find_all</span><span class="p">(</span><span class="s1">&#39;table&#39;</span><span class="p">)</span>
+<span class="nb">len</span><span class="p">(</span><span class="n">tables</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>1
+</pre></div>
+</div>
+</div>
+</div>
+<p>Excellent! We’ve managed to extract a table this time. To check it contains the information we want, we can extract the first row from the table and see what it look like.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">tables</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s1">&#39;tr&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>&lt;tr class=&quot;sp_lsmatch finished spmatcheven&quot;&gt;&lt;td class=&quot;sp_dtfield&quot;&gt;                                                    27/09/2024                                                                            &lt;/td&gt;&lt;td class=&quot;sp_tmfield&quot;&gt;7:30 pm&lt;/td&gt;&lt;td&gt;Trophy 2024-25&lt;/td&gt;&lt;td class=&quot;spteam1 tid178239&quot;&gt;&lt;span class=&quot;team1name&quot;&gt;Caledonia Gladiators&lt;/span&gt;&lt;span class=&quot;logo&quot;&gt;&lt;img src=&quot;https://images.statsengine.playbyplay.api.geniussports.com/706553f85ba846cfbcae48cf69f1c316T1.png&quot;/&gt;&lt;/span&gt;&lt;/td&gt;&lt;td class=&quot;sp_status&quot;&gt;Final&lt;/td&gt;&lt;td class=&quot;spteam2 tid178234&quot;&gt;&lt;span class=&quot;logo&quot;&gt;&lt;img src=&quot;https://images.statsengine.playbyplay.api.geniussports.com/516edf4c0fb58d77097883a0cf4966c3T1.png&quot;/&gt;&lt;/span&gt;&lt;span class=&quot;team1name&quot;&gt;Manchester Basketball&lt;/span&gt;&lt;/td&gt;&lt;td class=&quot;spscore&quot;&gt;&lt;a href=&quot;http://www.fibalivestats.com/webcast/SLB/2523184/&quot; style=&quot;text-decoration:none;&quot; target=&quot;_blank&quot;&gt;99 - 77&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;
+</pre></div>
+</div>
+</div>
+</div>
+<p>This definitely contains what we want - it’s the result of the Gladiators vs Manchester game from 27th Sept 2024 (Glads won 99-77).</p>
+</section>
+<section id="extracting-the-information-we-want-from-the-html">
+<h2>Extracting the information we want from the HTML<a class="headerlink" href="#extracting-the-information-we-want-from-the-html" title="Link to this heading">#</a></h2>
+<p>The information we want is held in the object above, but to hold the information we will need to construct a table we can create some Python dictionaries to contain the numbers of wins and losses, and the points for and against.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">wins</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;B. Braun Sheffield Sharks&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;Bristol Flyers&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;Caledonia Gladiators&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;Cheshire Phoenix&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> 
+        <span class="s2">&quot;Leicester Riders&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;London Lions&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;Manchester Basketball&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;Newcastle Eagles&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;Surrey 89ers&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">}</span>
+
+<span class="n">losses</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;B. Braun Sheffield Sharks&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;Bristol Flyers&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;Caledonia Gladiators&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;Cheshire Phoenix&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> 
+        <span class="s2">&quot;Leicester Riders&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;London Lions&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;Manchester Basketball&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;Newcastle Eagles&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;Surrey 89ers&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">}</span>
+
+<span class="n">points_for</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;B. Braun Sheffield Sharks&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;Bristol Flyers&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;Caledonia Gladiators&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;Cheshire Phoenix&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> 
+        <span class="s2">&quot;Leicester Riders&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;London Lions&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;Manchester Basketball&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;Newcastle Eagles&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;Surrey 89ers&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">}</span>
+
+<span class="n">points_allowed</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;B. Braun Sheffield Sharks&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;Bristol Flyers&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;Caledonia Gladiators&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;Cheshire Phoenix&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> 
+        <span class="s2">&quot;Leicester Riders&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;London Lions&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;Manchester Basketball&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;Newcastle Eagles&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;Surrey 89ers&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">}</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>Next we will extract all of the table rows, and define a string that we will use to filter only the Trophy results from the full set of games.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">results_rows</span> <span class="o">=</span> <span class="n">tables</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">find_all</span><span class="p">(</span><span class="s1">&#39;tr&#39;</span><span class="p">)</span>
+<span class="n">trophy_string</span> <span class="o">=</span> <span class="s2">&quot;Trophy 2024-25&quot;</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>Now it is time to extract and process the results into the dictionary. To do that, we will loop over all of the table rows, check if it was a Trophy game, and grab the information we want.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">for</span> <span class="n">entry</span> <span class="ow">in</span> <span class="n">results_rows</span><span class="p">:</span>
+    <span class="n">row_cells</span> <span class="o">=</span> <span class="n">entry</span><span class="o">.</span><span class="n">findAll</span><span class="p">(</span><span class="s1">&#39;td&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">row_cells</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">get_text</span><span class="p">()</span> <span class="o">==</span> <span class="n">trophy_string</span><span class="p">:</span>
+        <span class="n">home_team</span> <span class="o">=</span> <span class="n">row_cells</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span><span class="o">.</span><span class="n">get_text</span><span class="p">()</span>
+        <span class="n">away_team</span> <span class="o">=</span> <span class="n">row_cells</span><span class="p">[</span><span class="mi">5</span><span class="p">]</span><span class="o">.</span><span class="n">get_text</span><span class="p">()</span>
+        <span class="n">score</span> <span class="o">=</span> <span class="n">row_cells</span><span class="p">[</span><span class="mi">6</span><span class="p">]</span><span class="o">.</span><span class="n">get_text</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">score</span> <span class="o">!=</span> <span class="s2">&quot;Upcoming&quot;</span><span class="p">:</span>
+            <span class="n">score</span> <span class="o">=</span> <span class="n">score</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot; - &quot;</span><span class="p">)</span>
+            <span class="n">home_allowed</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">score</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+            <span class="n">away_allowed</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">score</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+            <span class="n">home_for</span> <span class="o">=</span> <span class="n">away_allowed</span>
+            <span class="n">away_for</span> <span class="o">=</span> <span class="n">home_allowed</span>
+            <span class="n">points_allowed</span><span class="p">[</span><span class="n">home_team</span><span class="p">]</span> <span class="o">=</span> <span class="n">points_allowed</span><span class="p">[</span><span class="n">home_team</span><span class="p">]</span> <span class="o">+</span> <span class="n">home_allowed</span>
+            <span class="n">points_allowed</span><span class="p">[</span><span class="n">away_team</span><span class="p">]</span> <span class="o">=</span> <span class="n">points_allowed</span><span class="p">[</span><span class="n">away_team</span><span class="p">]</span> <span class="o">+</span> <span class="n">away_allowed</span>
+            <span class="n">points_for</span><span class="p">[</span><span class="n">home_team</span><span class="p">]</span> <span class="o">=</span> <span class="n">points_for</span><span class="p">[</span><span class="n">home_team</span><span class="p">]</span> <span class="o">+</span> <span class="n">home_for</span>
+            <span class="n">points_for</span><span class="p">[</span><span class="n">away_team</span><span class="p">]</span> <span class="o">=</span> <span class="n">points_for</span><span class="p">[</span><span class="n">away_team</span><span class="p">]</span> <span class="o">+</span> <span class="n">away_for</span>
+            <span class="k">if</span> <span class="n">home_for</span> <span class="o">&gt;</span> <span class="n">away_for</span><span class="p">:</span>
+                <span class="c1"># Home team won</span>
+                <span class="n">wins</span><span class="p">[</span><span class="n">home_team</span><span class="p">]</span> <span class="o">=</span> <span class="n">wins</span><span class="p">[</span><span class="n">home_team</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span>
+                <span class="n">losses</span><span class="p">[</span><span class="n">away_team</span><span class="p">]</span> <span class="o">=</span> <span class="n">losses</span><span class="p">[</span><span class="n">away_team</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">losses</span><span class="p">[</span><span class="n">home_team</span><span class="p">]</span> <span class="o">=</span> <span class="n">losses</span><span class="p">[</span><span class="n">home_team</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span>
+                <span class="n">wins</span><span class="p">[</span><span class="n">away_team</span><span class="p">]</span> <span class="o">=</span> <span class="n">wins</span><span class="p">[</span><span class="n">away_team</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>Let’s have a quick peek inside the “wins” dictionary to check if we have something sensible.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">wins</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>{&#39;B. Braun Sheffield Sharks&#39;: 4,
+ &#39;Bristol Flyers&#39;: 3,
+ &#39;Caledonia Gladiators&#39;: 2,
+ &#39;Cheshire Phoenix&#39;: 6,
+ &#39;Leicester Riders&#39;: 5,
+ &#39;London Lions&#39;: 2,
+ &#39;Manchester Basketball&#39;: 0,
+ &#39;Newcastle Eagles&#39;: 5,
+ &#39;Surrey 89ers&#39;: 1}
+</pre></div>
+</div>
+</div>
+</div>
+<p>Now that we’ve got the data, it’s time to place it into lists and create a dataframe. Let’s start by importing pandas.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>Then the lists and dataframe</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">teams</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">wins</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+<span class="n">standings_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">()</span>
+<span class="n">standings_df</span><span class="p">[</span><span class="s2">&quot;Team&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">teams</span>
+
+<span class="n">wins_list</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">wins</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+<span class="n">losses_list</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">losses</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+<span class="n">points_for_list</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">points_for</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+<span class="n">points_allowed_list</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">points_allowed</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+
+<span class="n">standings_df</span><span class="p">[</span><span class="s2">&quot;W&quot;</span><span class="p">],</span> <span class="n">standings_df</span><span class="p">[</span><span class="s2">&quot;L&quot;</span><span class="p">],</span> <span class="n">standings_df</span><span class="p">[</span><span class="s2">&quot;PPG&quot;</span><span class="p">],</span> <span class="n">standings_df</span><span class="p">[</span><span class="s2">&quot;OPPG&quot;</span><span class="p">]</span>  <span class="o">=</span> <span class="p">[</span><span class="n">wins_list</span><span class="p">,</span> <span class="n">losses_list</span><span class="p">,</span> <span class="n">points_for_list</span><span class="p">,</span> 
+                                                                                     <span class="n">points_allowed_list</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>We can take a look at the information that’s gone into the dataframe.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">standings_df</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>Team</th>
+      <th>W</th>
+      <th>L</th>
+      <th>PPG</th>
+      <th>OPPG</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>B. Braun Sheffield Sharks</td>
+      <td>4</td>
+      <td>3</td>
+      <td>603</td>
+      <td>578</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>Bristol Flyers</td>
+      <td>3</td>
+      <td>3</td>
+      <td>521</td>
+      <td>505</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>Caledonia Gladiators</td>
+      <td>2</td>
+      <td>5</td>
+      <td>573</td>
+      <td>601</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>Cheshire Phoenix</td>
+      <td>6</td>
+      <td>1</td>
+      <td>664</td>
+      <td>570</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>Leicester Riders</td>
+      <td>5</td>
+      <td>0</td>
+      <td>461</td>
+      <td>387</td>
+    </tr>
+    <tr>
+      <th>5</th>
+      <td>London Lions</td>
+      <td>2</td>
+      <td>3</td>
+      <td>393</td>
+      <td>418</td>
+    </tr>
+    <tr>
+      <th>6</th>
+      <td>Manchester Basketball</td>
+      <td>0</td>
+      <td>6</td>
+      <td>468</td>
+      <td>564</td>
+    </tr>
+    <tr>
+      <th>7</th>
+      <td>Newcastle Eagles</td>
+      <td>5</td>
+      <td>2</td>
+      <td>557</td>
+      <td>552</td>
+    </tr>
+    <tr>
+      <th>8</th>
+      <td>Surrey 89ers</td>
+      <td>1</td>
+      <td>5</td>
+      <td>455</td>
+      <td>520</td>
+    </tr>
+  </tbody>
+</table>
+</div></div></div>
+</div>
+</section>
+<section id="create-a-table-based-on-the-results">
+<h2>Create a table based on the results<a class="headerlink" href="#create-a-table-based-on-the-results" title="Link to this heading">#</a></h2>
+<p>Use the information from the dataframe to calculate some new columns: number of games played (GP), the difference in points scored/points allowed (Diff), a number of points based on 2 points for a win (fictional for the Trophy competition), and a percentage of games won (Win%).</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">standings_df</span><span class="p">[</span><span class="s2">&quot;GP&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">standings_df</span><span class="p">[</span><span class="s2">&quot;W&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="n">standings_df</span><span class="p">[</span><span class="s2">&quot;L&quot;</span><span class="p">]</span>
+<span class="n">standings_df</span><span class="p">[</span><span class="s2">&quot;Diff&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">standings_df</span><span class="p">[</span><span class="s2">&quot;PPG&quot;</span><span class="p">]</span> <span class="o">-</span> <span class="n">standings_df</span><span class="p">[</span><span class="s2">&quot;OPPG&quot;</span><span class="p">]</span>
+<span class="n">standings_df</span><span class="p">[</span><span class="s2">&quot;Pts&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">standings_df</span><span class="p">[</span><span class="s2">&quot;W&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="mi">2</span>
+<span class="n">standings_df</span><span class="p">[</span><span class="s2">&quot;Win%&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">standings_df</span><span class="p">[</span><span class="s2">&quot;W&quot;</span><span class="p">]</span> <span class="o">/</span> <span class="n">standings_df</span><span class="p">[</span><span class="s2">&quot;GP&quot;</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>The NBA often use a “games back” (GB) column in their standings tables, so we can define a series of functions to calculate it.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">w_games_behind</span><span class="p">(</span><span class="n">wins</span><span class="p">,</span> <span class="n">wins_ref</span><span class="p">):</span>
+    <span class="n">w_diff</span> <span class="o">=</span> <span class="n">wins_ref</span> <span class="o">-</span> <span class="n">wins</span>
+    <span class="k">return</span> <span class="n">w_diff</span><span class="o">/</span><span class="mi">2</span>
+
+<span class="k">def</span> <span class="nf">l_games_behind</span><span class="p">(</span><span class="n">losses</span><span class="p">,</span> <span class="n">losses_ref</span><span class="p">):</span>
+    <span class="n">l_diff</span> <span class="o">=</span> <span class="n">losses</span> <span class="o">-</span> <span class="n">losses_ref</span>
+    <span class="k">return</span> <span class="n">l_diff</span><span class="o">/</span><span class="mi">2</span>
+
+<span class="k">def</span> <span class="nf">games_back</span><span class="p">(</span><span class="n">w_games</span><span class="p">,</span> <span class="n">l_games</span><span class="p">):</span>
+    <span class="n">g_back</span> <span class="o">=</span> <span class="n">w_games</span> <span class="o">+</span> <span class="n">l_games</span>
+    <span class="k">return</span> <span class="n">g_back</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>We can then calculate how many “games back” each team, is after working out which team has the best Win%.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">best_win_per</span> <span class="o">=</span> <span class="n">standings_df</span><span class="p">[</span><span class="s1">&#39;Win%&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">idxmax</span><span class="p">()</span>
+<span class="n">wins_ref</span> <span class="o">=</span> <span class="n">standings_df</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">best_win_per</span><span class="p">][</span><span class="s1">&#39;W&#39;</span><span class="p">]</span>
+<span class="n">losses_ref</span> <span class="o">=</span> <span class="n">standings_df</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">best_win_per</span><span class="p">][</span><span class="s1">&#39;L&#39;</span><span class="p">]</span>
+<span class="n">standings_df</span><span class="p">[</span><span class="s1">&#39;wgb&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">standings_df</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">w_games_behind</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="s1">&#39;W&#39;</span><span class="p">],</span> <span class="n">wins_ref</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">standings_df</span><span class="p">[</span><span class="s1">&#39;lgb&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">standings_df</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">l_games_behind</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="s1">&#39;L&#39;</span><span class="p">],</span> <span class="n">losses_ref</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">standings_df</span><span class="p">[</span><span class="s1">&#39;GB&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">standings_df</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">games_back</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="s1">&#39;wgb&#39;</span><span class="p">],</span> <span class="n">x</span><span class="p">[</span><span class="s1">&#39;lgb&#39;</span><span class="p">]),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="c1"># Replace the 0.0 games back for the top team with --</span>
+<span class="n">standings_df</span><span class="p">[</span><span class="s1">&#39;GB&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">replace</span><span class="p">([</span><span class="mf">0.0</span><span class="p">],</span> <span class="p">[</span><span class="s1">&#39;--&#39;</span><span class="p">],</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>Calling the dataframe will show us what data we have so far.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">standings_df</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>Team</th>
+      <th>W</th>
+      <th>L</th>
+      <th>PPG</th>
+      <th>OPPG</th>
+      <th>GP</th>
+      <th>Diff</th>
+      <th>Pts</th>
+      <th>Win%</th>
+      <th>wgb</th>
+      <th>lgb</th>
+      <th>GB</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>B. Braun Sheffield Sharks</td>
+      <td>4</td>
+      <td>3</td>
+      <td>603</td>
+      <td>578</td>
+      <td>7</td>
+      <td>25</td>
+      <td>8</td>
+      <td>0.571429</td>
+      <td>0.5</td>
+      <td>1.5</td>
+      <td>2.0</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>Bristol Flyers</td>
+      <td>3</td>
+      <td>3</td>
+      <td>521</td>
+      <td>505</td>
+      <td>6</td>
+      <td>16</td>
+      <td>6</td>
+      <td>0.500000</td>
+      <td>1.0</td>
+      <td>1.5</td>
+      <td>2.5</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>Caledonia Gladiators</td>
+      <td>2</td>
+      <td>5</td>
+      <td>573</td>
+      <td>601</td>
+      <td>7</td>
+      <td>-28</td>
+      <td>4</td>
+      <td>0.285714</td>
+      <td>1.5</td>
+      <td>2.5</td>
+      <td>4.0</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>Cheshire Phoenix</td>
+      <td>6</td>
+      <td>1</td>
+      <td>664</td>
+      <td>570</td>
+      <td>7</td>
+      <td>94</td>
+      <td>12</td>
+      <td>0.857143</td>
+      <td>-0.5</td>
+      <td>0.5</td>
+      <td>--</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>Leicester Riders</td>
+      <td>5</td>
+      <td>0</td>
+      <td>461</td>
+      <td>387</td>
+      <td>5</td>
+      <td>74</td>
+      <td>10</td>
+      <td>1.000000</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>--</td>
+    </tr>
+    <tr>
+      <th>5</th>
+      <td>London Lions</td>
+      <td>2</td>
+      <td>3</td>
+      <td>393</td>
+      <td>418</td>
+      <td>5</td>
+      <td>-25</td>
+      <td>4</td>
+      <td>0.400000</td>
+      <td>1.5</td>
+      <td>1.5</td>
+      <td>3.0</td>
+    </tr>
+    <tr>
+      <th>6</th>
+      <td>Manchester Basketball</td>
+      <td>0</td>
+      <td>6</td>
+      <td>468</td>
+      <td>564</td>
+      <td>6</td>
+      <td>-96</td>
+      <td>0</td>
+      <td>0.000000</td>
+      <td>2.5</td>
+      <td>3.0</td>
+      <td>5.5</td>
+    </tr>
+    <tr>
+      <th>7</th>
+      <td>Newcastle Eagles</td>
+      <td>5</td>
+      <td>2</td>
+      <td>557</td>
+      <td>552</td>
+      <td>7</td>
+      <td>5</td>
+      <td>10</td>
+      <td>0.714286</td>
+      <td>0.0</td>
+      <td>1.0</td>
+      <td>1.0</td>
+    </tr>
+    <tr>
+      <th>8</th>
+      <td>Surrey 89ers</td>
+      <td>1</td>
+      <td>5</td>
+      <td>455</td>
+      <td>520</td>
+      <td>6</td>
+      <td>-65</td>
+      <td>2</td>
+      <td>0.166667</td>
+      <td>2.0</td>
+      <td>2.5</td>
+      <td>4.5</td>
+    </tr>
+  </tbody>
+</table>
+</div></div></div>
+</div>
+<p>It’s now time to turn this into a nice looking “league” table. We will define some functions to add colour and bold font based on whether a value is greater than or less than a threshold.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">colour_threshold_lessthan</span><span class="p">(</span><span class="n">value</span><span class="p">,</span><span class="n">threshold</span><span class="p">,</span><span class="n">colour</span> <span class="o">=</span> <span class="s1">&#39;red&#39;</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">value</span> <span class="o">&lt;</span> <span class="n">threshold</span><span class="p">:</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s1">&#39;color: </span><span class="si">{</span><span class="n">colour</span><span class="si">}</span><span class="s1">&#39;</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s1">&#39;&#39;</span>
+    
+<span class="k">def</span> <span class="nf">colour_threshold_morethan</span><span class="p">(</span><span class="n">value</span><span class="p">,</span><span class="n">threshold</span><span class="p">,</span><span class="n">colour</span> <span class="o">=</span> <span class="s1">&#39;green&#39;</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">value</span> <span class="o">&gt;</span> <span class="n">threshold</span><span class="p">:</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s1">&#39;color: </span><span class="si">{</span><span class="n">colour</span><span class="si">}</span><span class="s1">&#39;</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s1">&#39;&#39;</span>
+
+<span class="c1"># functions to change font weight based on a threshold    </span>
+<span class="k">def</span> <span class="nf">weight_threshold_lessthan</span><span class="p">(</span><span class="n">value</span><span class="p">,</span><span class="n">threshold</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">value</span> <span class="o">&lt;</span> <span class="n">threshold</span><span class="p">:</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s1">&#39;font-weight: bold&#39;</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s1">&#39;&#39;</span>
+
+<span class="k">def</span> <span class="nf">weight_threshold_morethan</span><span class="p">(</span><span class="n">value</span><span class="p">,</span><span class="n">threshold</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">value</span> <span class="o">&gt;</span> <span class="n">threshold</span><span class="p">:</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s1">&#39;font-weight: bold&#39;</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s1">&#39;&#39;</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>We will sort the table so that the team with the highest Win% goes first, then lowest number of games back, then use Diff to sort any teams that would be tied.</p>
+<p>We will only print a subset of the stats that are contained in the dataframe, and apply some formating.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">standings_df</span> <span class="o">=</span> <span class="n">standings_df</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="n">by</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;Win%&quot;</span><span class="p">,</span> <span class="s2">&quot;GB&quot;</span><span class="p">,</span> <span class="s2">&quot;Diff&quot;</span><span class="p">],</span> <span class="n">ascending</span><span class="o">=</span><span class="p">[</span><span class="kc">False</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">False</span><span class="p">])</span>
+<span class="n">standings_df</span> <span class="o">=</span> <span class="n">standings_df</span><span class="p">[[</span><span class="s2">&quot;Team&quot;</span><span class="p">,</span> <span class="s2">&quot;GP&quot;</span><span class="p">,</span> <span class="s2">&quot;W&quot;</span><span class="p">,</span> <span class="s2">&quot;L&quot;</span><span class="p">,</span> <span class="s2">&quot;PPG&quot;</span><span class="p">,</span> <span class="s2">&quot;OPPG&quot;</span><span class="p">,</span> <span class="s2">&quot;Diff&quot;</span><span class="p">,</span> <span class="s2">&quot;Win%&quot;</span><span class="p">,</span> <span class="s2">&quot;GB&quot;</span><span class="p">]]</span>
+<span class="n">standings_df</span><span class="o">.</span><span class="n">style</span><span class="o">.</span><span class="n">format</span><span class="p">({</span><span class="s1">&#39;Win%&#39;</span><span class="p">:</span><span class="s1">&#39;</span><span class="si">{:.2}</span><span class="s1">&#39;</span><span class="p">})</span><span class="o">.</span><span class="n">set_caption</span><span class="p">(</span><span class="s1">&#39;SLB ficticious Trophy standings&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">set_table_styles</span><span class="p">([{</span>
+    <span class="s1">&#39;selector&#39;</span><span class="p">:</span> <span class="s1">&#39;caption&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;props&#39;</span><span class="p">:</span> <span class="p">[</span>
+        <span class="p">(</span><span class="s1">&#39;text-align&#39;</span><span class="p">,</span> <span class="s1">&#39;left&#39;</span><span class="p">),</span>
+        <span class="p">(</span><span class="s1">&#39;font-size&#39;</span><span class="p">,</span> <span class="s1">&#39;18px&#39;</span><span class="p">),</span>
+        <span class="p">(</span><span class="s1">&#39;font-weight&#39;</span><span class="p">,</span> <span class="s1">&#39;bold&#39;</span><span class="p">)</span>
+    <span class="p">]</span>
+<span class="p">}])</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="n">colour_threshold_lessthan</span><span class="p">,</span><span class="n">threshold</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span><span class="n">subset</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Diff&#39;</span><span class="p">])</span>\
+<span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="n">weight_threshold_lessthan</span><span class="p">,</span><span class="n">threshold</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span><span class="n">subset</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Diff&#39;</span><span class="p">])</span>\
+<span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="n">colour_threshold_morethan</span><span class="p">,</span><span class="n">threshold</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span><span class="n">subset</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Diff&#39;</span><span class="p">])</span>\
+<span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="n">weight_threshold_morethan</span><span class="p">,</span><span class="n">threshold</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span><span class="n">subset</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Diff&#39;</span><span class="p">])</span>\
+<span class="o">.</span><span class="n">hide</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="s2">&quot;index&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><style type="text/css">
+#T_ab073 caption {
+  text-align: left;
+  font-size: 18px;
+  font-weight: bold;
+}
+#T_ab073_row0_col6, #T_ab073_row1_col6, #T_ab073_row2_col6, #T_ab073_row3_col6, #T_ab073_row4_col6 {
+  color: green;
+  font-weight: bold;
+}
+#T_ab073_row5_col6, #T_ab073_row6_col6, #T_ab073_row7_col6, #T_ab073_row8_col6 {
+  color: red;
+  font-weight: bold;
+}
+</style>
+<table id="T_ab073">
+  <caption>SLB ficticious Trophy standings</caption>
+  <thead>
+    <tr>
+      <th id="T_ab073_level0_col0" class="col_heading level0 col0" >Team</th>
+      <th id="T_ab073_level0_col1" class="col_heading level0 col1" >GP</th>
+      <th id="T_ab073_level0_col2" class="col_heading level0 col2" >W</th>
+      <th id="T_ab073_level0_col3" class="col_heading level0 col3" >L</th>
+      <th id="T_ab073_level0_col4" class="col_heading level0 col4" >PPG</th>
+      <th id="T_ab073_level0_col5" class="col_heading level0 col5" >OPPG</th>
+      <th id="T_ab073_level0_col6" class="col_heading level0 col6" >Diff</th>
+      <th id="T_ab073_level0_col7" class="col_heading level0 col7" >Win%</th>
+      <th id="T_ab073_level0_col8" class="col_heading level0 col8" >GB</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td id="T_ab073_row0_col0" class="data row0 col0" >Leicester Riders</td>
+      <td id="T_ab073_row0_col1" class="data row0 col1" >5</td>
+      <td id="T_ab073_row0_col2" class="data row0 col2" >5</td>
+      <td id="T_ab073_row0_col3" class="data row0 col3" >0</td>
+      <td id="T_ab073_row0_col4" class="data row0 col4" >461</td>
+      <td id="T_ab073_row0_col5" class="data row0 col5" >387</td>
+      <td id="T_ab073_row0_col6" class="data row0 col6" >74</td>
+      <td id="T_ab073_row0_col7" class="data row0 col7" >1.0</td>
+      <td id="T_ab073_row0_col8" class="data row0 col8" >--</td>
+    </tr>
+    <tr>
+      <td id="T_ab073_row1_col0" class="data row1 col0" >Cheshire Phoenix</td>
+      <td id="T_ab073_row1_col1" class="data row1 col1" >7</td>
+      <td id="T_ab073_row1_col2" class="data row1 col2" >6</td>
+      <td id="T_ab073_row1_col3" class="data row1 col3" >1</td>
+      <td id="T_ab073_row1_col4" class="data row1 col4" >664</td>
+      <td id="T_ab073_row1_col5" class="data row1 col5" >570</td>
+      <td id="T_ab073_row1_col6" class="data row1 col6" >94</td>
+      <td id="T_ab073_row1_col7" class="data row1 col7" >0.86</td>
+      <td id="T_ab073_row1_col8" class="data row1 col8" >--</td>
+    </tr>
+    <tr>
+      <td id="T_ab073_row2_col0" class="data row2 col0" >Newcastle Eagles</td>
+      <td id="T_ab073_row2_col1" class="data row2 col1" >7</td>
+      <td id="T_ab073_row2_col2" class="data row2 col2" >5</td>
+      <td id="T_ab073_row2_col3" class="data row2 col3" >2</td>
+      <td id="T_ab073_row2_col4" class="data row2 col4" >557</td>
+      <td id="T_ab073_row2_col5" class="data row2 col5" >552</td>
+      <td id="T_ab073_row2_col6" class="data row2 col6" >5</td>
+      <td id="T_ab073_row2_col7" class="data row2 col7" >0.71</td>
+      <td id="T_ab073_row2_col8" class="data row2 col8" >1.000000</td>
+    </tr>
+    <tr>
+      <td id="T_ab073_row3_col0" class="data row3 col0" >B. Braun Sheffield Sharks</td>
+      <td id="T_ab073_row3_col1" class="data row3 col1" >7</td>
+      <td id="T_ab073_row3_col2" class="data row3 col2" >4</td>
+      <td id="T_ab073_row3_col3" class="data row3 col3" >3</td>
+      <td id="T_ab073_row3_col4" class="data row3 col4" >603</td>
+      <td id="T_ab073_row3_col5" class="data row3 col5" >578</td>
+      <td id="T_ab073_row3_col6" class="data row3 col6" >25</td>
+      <td id="T_ab073_row3_col7" class="data row3 col7" >0.57</td>
+      <td id="T_ab073_row3_col8" class="data row3 col8" >2.000000</td>
+    </tr>
+    <tr>
+      <td id="T_ab073_row4_col0" class="data row4 col0" >Bristol Flyers</td>
+      <td id="T_ab073_row4_col1" class="data row4 col1" >6</td>
+      <td id="T_ab073_row4_col2" class="data row4 col2" >3</td>
+      <td id="T_ab073_row4_col3" class="data row4 col3" >3</td>
+      <td id="T_ab073_row4_col4" class="data row4 col4" >521</td>
+      <td id="T_ab073_row4_col5" class="data row4 col5" >505</td>
+      <td id="T_ab073_row4_col6" class="data row4 col6" >16</td>
+      <td id="T_ab073_row4_col7" class="data row4 col7" >0.5</td>
+      <td id="T_ab073_row4_col8" class="data row4 col8" >2.500000</td>
+    </tr>
+    <tr>
+      <td id="T_ab073_row5_col0" class="data row5 col0" >London Lions</td>
+      <td id="T_ab073_row5_col1" class="data row5 col1" >5</td>
+      <td id="T_ab073_row5_col2" class="data row5 col2" >2</td>
+      <td id="T_ab073_row5_col3" class="data row5 col3" >3</td>
+      <td id="T_ab073_row5_col4" class="data row5 col4" >393</td>
+      <td id="T_ab073_row5_col5" class="data row5 col5" >418</td>
+      <td id="T_ab073_row5_col6" class="data row5 col6" >-25</td>
+      <td id="T_ab073_row5_col7" class="data row5 col7" >0.4</td>
+      <td id="T_ab073_row5_col8" class="data row5 col8" >3.000000</td>
+    </tr>
+    <tr>
+      <td id="T_ab073_row6_col0" class="data row6 col0" >Caledonia Gladiators</td>
+      <td id="T_ab073_row6_col1" class="data row6 col1" >7</td>
+      <td id="T_ab073_row6_col2" class="data row6 col2" >2</td>
+      <td id="T_ab073_row6_col3" class="data row6 col3" >5</td>
+      <td id="T_ab073_row6_col4" class="data row6 col4" >573</td>
+      <td id="T_ab073_row6_col5" class="data row6 col5" >601</td>
+      <td id="T_ab073_row6_col6" class="data row6 col6" >-28</td>
+      <td id="T_ab073_row6_col7" class="data row6 col7" >0.29</td>
+      <td id="T_ab073_row6_col8" class="data row6 col8" >4.000000</td>
+    </tr>
+    <tr>
+      <td id="T_ab073_row7_col0" class="data row7 col0" >Surrey 89ers</td>
+      <td id="T_ab073_row7_col1" class="data row7 col1" >6</td>
+      <td id="T_ab073_row7_col2" class="data row7 col2" >1</td>
+      <td id="T_ab073_row7_col3" class="data row7 col3" >5</td>
+      <td id="T_ab073_row7_col4" class="data row7 col4" >455</td>
+      <td id="T_ab073_row7_col5" class="data row7 col5" >520</td>
+      <td id="T_ab073_row7_col6" class="data row7 col6" >-65</td>
+      <td id="T_ab073_row7_col7" class="data row7 col7" >0.17</td>
+      <td id="T_ab073_row7_col8" class="data row7 col8" >4.500000</td>
+    </tr>
+    <tr>
+      <td id="T_ab073_row8_col0" class="data row8 col0" >Manchester Basketball</td>
+      <td id="T_ab073_row8_col1" class="data row8 col1" >6</td>
+      <td id="T_ab073_row8_col2" class="data row8 col2" >0</td>
+      <td id="T_ab073_row8_col3" class="data row8 col3" >6</td>
+      <td id="T_ab073_row8_col4" class="data row8 col4" >468</td>
+      <td id="T_ab073_row8_col5" class="data row8 col5" >564</td>
+      <td id="T_ab073_row8_col6" class="data row8 col6" >-96</td>
+      <td id="T_ab073_row8_col7" class="data row8 col7" >0.0</td>
+      <td id="T_ab073_row8_col8" class="data row8 col8" >5.500000</td>
+    </tr>
+  </tbody>
+</table>
+</div></div>
+</div>
+<p>As a summary, in this Chapter we have used automated control of a web browser to extract HTML from a complicated website, processed the data into a dataframe, then produced a league standings table using some stats that we calculated based on game results.</p>
+<section id="exercises">
+<h3>Exercises<a class="headerlink" href="#exercises" title="Link to this heading">#</a></h3>
+<p>To extend this, you could:</p>
+<ol class="arabic simple">
+<li><p>Modify the code to extract the data on a different set of games, for example, the SLB Championship.</p></li>
+<li><p>Produce a different league table, which shows other sets of stats and is based on achieving two points for each game won.</p></li>
+</ol>
+</section>
+</section>
 </section>
 
     <script type="text/x-thebe-config">
@@ -442,6 +1188,26 @@ document.write(`
             </div>
             
             
+              
+                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+  <div class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> Contents
+  </div>
+  <nav class="bd-toc-nav page-toc">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#accessing-the-correct-html-data">Accessing the correct HTML data</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#extracting-the-information-we-want-from-the-html">Extracting the information we want from the HTML</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#create-a-table-based-on-the-results">Create a table based on the results</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#exercises">Exercises</a></li>
+</ul>
+</li>
+</ul>
+  </nav></div>
+
+</div></div>
               
             
           </div>
