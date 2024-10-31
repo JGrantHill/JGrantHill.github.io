@@ -26,6 +26,18 @@ Scraping is extracting/harvesting data, usually from a website. While some sport
 
 In this book, we will explore how to scrape SLB data using Python, and then focus on analysing that data. In principle, this data could be analysed with spreadsheet software or other tools, but we will also use Python.
 
+```{warning}
+Webpages change all of the time (try looking up the British Basketball League from last season) and this 
+can mean that code for scraping a particular website suddenly stops working. All of the code in this book
+correctly scraped the data at time of writing, but there is no guarantee that it still works when you read this.
+Hopefully the information presented on the underlying principles will help you to scrape data from whichever 
+webpages you are interested in.
+
+For me, scraping data for the purposes of basketball statistics and analysis is an unpaid hobby. If you are
+looking to do this for commercial gain, you should conduct your own due diligence into your rights to use
+any data you obtain from websites.
+```
+
 ## Running the Code
 
 While it is possible to learn something about data scraping and analysis simply by reading the pages in this book,
