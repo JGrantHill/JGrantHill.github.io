@@ -1,0 +1,1905 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="./" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Calculating statistics from boxscores &#8212; SLB Data and Analytics</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="_static/styles/theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="_static/styles/bootstrap.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="_static/styles/pydata-sphinx-theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+
+  
+  <link href="_static/vendor/fontawesome/6.5.2/css/all.min.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.5.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.5.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.5.2/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="_static/styles/sphinx-book-theme.css?v=a3416100" />
+    <link rel="stylesheet" type="text/css" href="_static/togglebutton.css?v=13237357" />
+    <link rel="stylesheet" type="text/css" href="_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css?v=be8a1c11" />
+    <link rel="stylesheet" type="text/css" href="_static/sphinx-thebe.css?v=4fa983c6" />
+    <link rel="stylesheet" type="text/css" href="_static/sphinx-design.min.css?v=95c83b7e" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b" />
+<link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
+  <script src="_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+    <script src="_static/documentation_options.js?v=9eb32ce0"></script>
+    <script src="_static/doctools.js?v=9a2dae69"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="_static/copybutton.js?v=f281be69"></script>
+    <script src="_static/scripts/sphinx-book-theme.js?v=887ef09a"></script>
+    <script>let toggleHintShow = 'Click to show';</script>
+    <script>let toggleHintHide = 'Click to hide';</script>
+    <script>let toggleOpenOnPrint = 'true';</script>
+    <script src="_static/togglebutton.js?v=4a39c7ea"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script src="_static/design-tabs.js?v=f930bc37"></script>
+    <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"; const thebe_selector = ".thebe,.cell"; const thebe_selector_input = "pre"; const thebe_selector_output = ".output, .cell_output"</script>
+    <script async="async" src="_static/sphinx-thebe.js?v=c100c467"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"; const thebe_selector = ".thebe,.cell"; const thebe_selector_input = "pre"; const thebe_selector_output = ".output, .cell_output"</script>
+    <script>window.MathJax = {"options": {"processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'Stats_from_boxscores';</script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Further resources" href="resources.html" />
+    <link rel="prev" title="SLB boxscore data scrape" href="SLB_boxscore_scrape.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-primary-sidebar-checkbox"/>
+  <label class="overlay overlay-primary" for="pst-primary-sidebar-checkbox"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-secondary-sidebar-checkbox"/>
+  <label class="overlay overlay-secondary" for="pst-secondary-sidebar-checkbox"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search this book..."
+         aria-label="Search this book..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+    
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="intro.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="_static/jumpshot_theory_logo.png" class="logo__image only-light" alt="SLB Data and Analytics - Home"/>
+    <script>document.write(`<img src="_static/jumpshot_theory_logo.png" class="logo__image only-dark" alt="SLB Data and Analytics - Home"/>`);</script>
+  
+  
+</a></div>
+        <div class="sidebar-primary-item">
+
+ <script>
+ document.write(`
+   <button class="btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script></div>
+        <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item navbar-nav active">
+        
+        <ul class="nav bd-sidenav bd-sidenav__home-link">
+            <li class="toctree-l1">
+                <a class="reference internal" href="intro.html">
+                    SLB Data and Analytics
+                </a>
+            </li>
+        </ul>
+        <ul class="current nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="python.html">Python</a></li>
+<li class="toctree-l1"><a class="reference internal" href="FirstForay.html">A First Foray into Data Scraping</a></li>
+<li class="toctree-l1"><a class="reference internal" href="JavascriptScrape.html">Scraping Javascript heavy websites</a></li>
+<li class="toctree-l1"><a class="reference internal" href="SLB_boxscore_scrape.html">SLB boxscore data scrape</a></li>
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">Calculating statistics from boxscores</a></li>
+<li class="toctree-l1"><a class="reference internal" href="resources.html">Further resources</a></li>
+</ul>
+
+    </div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+
+<div class="sbt-scroll-pixel-helper"></div>
+
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item"><button class="sidebar-toggle primary-toggle btn btn-sm" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <span class="fa-solid fa-bars"></span>
+</button></div>
+      
+    </div>
+  
+  
+    <div class="header-article-items__end">
+      
+        <div class="header-article-item">
+
+<div class="article-header-buttons">
+
+
+
+
+
+<div class="dropdown dropdown-source-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Source repositories">
+    <i class="fab fa-github"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="https://github.com/executablebooks/jupyter-book" target="_blank"
+   class="btn btn-sm btn-source-repository-button dropdown-item"
+   title="Source repository"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fab fa-github"></i>
+  </span>
+<span class="btn__text-container">Repository</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li><a href="https://github.com/executablebooks/jupyter-book/issues/new?title=Issue%20on%20page%20%2FStats_from_boxscores.html&body=Your%20issue%20content%20here." target="_blank"
+   class="btn btn-sm btn-source-issues-button dropdown-item"
+   title="Open an issue"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-lightbulb"></i>
+  </span>
+<span class="btn__text-container">Open issue</span>
+</a>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+
+
+<div class="dropdown dropdown-download-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Download this page">
+    <i class="fas fa-download"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="_sources/Stats_from_boxscores.ipynb" target="_blank"
+   class="btn btn-sm btn-download-source-button dropdown-item"
+   title="Download source file"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file"></i>
+  </span>
+<span class="btn__text-container">.ipynb</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li>
+<button onclick="window.print()"
+  class="btn btn-sm btn-download-pdf-button dropdown-item"
+  title="Print to PDF"
+  data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file-pdf"></i>
+  </span>
+<span class="btn__text-container">.pdf</span>
+</button>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+<button onclick="toggleFullScreen()"
+  class="btn btn-sm btn-fullscreen-button"
+  title="Fullscreen mode"
+  data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-expand"></i>
+  </span>
+
+</button>
+
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"></i>
+  </button>
+`);
+</script>
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm pst-navbar-icon search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+  </button>
+`);
+</script>
+<button class="sidebar-toggle secondary-toggle btn btn-sm" title="Toggle secondary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="fa-solid fa-list"></span>
+</button>
+</div></div>
+      
+    </div>
+  
+</div>
+</div>
+              
+              
+
+<div id="jb-print-docs-body" class="onlyprint">
+    <h1>Calculating statistics from boxscores</h1>
+    <!-- Table of contents -->
+    <div id="print-main-content">
+        <div id="jb-print-toc">
+            
+            <div>
+                <h2> Contents </h2>
+            </div>
+            <nav aria-label="Page">
+                <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#calculating-the-performance-index">Calculating the performance index</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#calculating-the-true-shooting-percentage">Calculating the true shooting percentage</a></li>
+</ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section class="tex2jax_ignore mathjax_ignore" id="calculating-statistics-from-boxscores">
+<h1>Calculating statistics from boxscores<a class="headerlink" href="#calculating-statistics-from-boxscores" title="Link to this heading">#</a></h1>
+<p>As usual, we start by importing the modules and libraries we will need.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>We are now going to create a dataframe from the boxscores of the Sheffield Hatters vs Caledonia Gladiators game that took place on 27 October 2024. The CSV file containing this boxscore was created using similar code to that shown in the <a class="reference internal" href="SLB_boxscore_scrape.html"><span class="std std-doc">Chapter on scraping boxscore data</span></a>.</p>
+<p>The CSV file is also available to directly download from …</p>
+<p>Note that you calculate most of these statistics in spreadsheet software, if you would prefer.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">path_to_file</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="s1">&#39;data/Hatters-Vs-Gladiators-20241102.csv&#39;</span><span class="p">)</span>
+<span class="k">if</span> <span class="n">path_to_file</span><span class="o">.</span><span class="n">exists</span><span class="p">()</span> <span class="ow">and</span> <span class="n">path_to_file</span><span class="o">.</span><span class="n">is_file</span><span class="p">():</span>
+    <span class="n">boxscores_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">path_to_file</span><span class="p">,</span> <span class="n">index_col</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<span class="k">else</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Unable to open the file:&quot;</span><span class="p">,</span> <span class="n">path_to_file</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>Let’s have a quick peek inside the file to make sure it contains what we expect.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">boxscores_df</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>Name</th>
+      <th>Team</th>
+      <th>Mins</th>
+      <th>PTS</th>
+      <th>FGM</th>
+      <th>FGA</th>
+      <th>FG%</th>
+      <th>2PM</th>
+      <th>2PA</th>
+      <th>2P%</th>
+      <th>...</th>
+      <th>DREB</th>
+      <th>REB</th>
+      <th>AST</th>
+      <th>TO</th>
+      <th>STL</th>
+      <th>BLK</th>
+      <th>BLKR</th>
+      <th>PF</th>
+      <th>FOULON</th>
+      <th>PLUSMINUS</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>L. Zolper</td>
+      <td>Hatters</td>
+      <td>29:00</td>
+      <td>12</td>
+      <td>2</td>
+      <td>8</td>
+      <td>25</td>
+      <td>1</td>
+      <td>5</td>
+      <td>20</td>
+      <td>...</td>
+      <td>3</td>
+      <td>3</td>
+      <td>1</td>
+      <td>3</td>
+      <td>2</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>4</td>
+      <td>5</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>G. Gayle</td>
+      <td>Hatters</td>
+      <td>23:55</td>
+      <td>16</td>
+      <td>4</td>
+      <td>7</td>
+      <td>57</td>
+      <td>3</td>
+      <td>6</td>
+      <td>50</td>
+      <td>...</td>
+      <td>2</td>
+      <td>2</td>
+      <td>2</td>
+      <td>1</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>4</td>
+      <td>7</td>
+      <td>12</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>N. Krisper</td>
+      <td>Hatters</td>
+      <td>33:37</td>
+      <td>15</td>
+      <td>6</td>
+      <td>10</td>
+      <td>60</td>
+      <td>5</td>
+      <td>7</td>
+      <td>71</td>
+      <td>...</td>
+      <td>1</td>
+      <td>5</td>
+      <td>5</td>
+      <td>5</td>
+      <td>2</td>
+      <td>0</td>
+      <td>0</td>
+      <td>3</td>
+      <td>3</td>
+      <td>10</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>M. Washington</td>
+      <td>Hatters</td>
+      <td>31:36</td>
+      <td>12</td>
+      <td>6</td>
+      <td>9</td>
+      <td>66</td>
+      <td>6</td>
+      <td>9</td>
+      <td>66</td>
+      <td>...</td>
+      <td>4</td>
+      <td>6</td>
+      <td>4</td>
+      <td>3</td>
+      <td>5</td>
+      <td>1</td>
+      <td>0</td>
+      <td>2</td>
+      <td>2</td>
+      <td>13</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>E. Gandini</td>
+      <td>Hatters</td>
+      <td>20:30</td>
+      <td>2</td>
+      <td>1</td>
+      <td>4</td>
+      <td>25</td>
+      <td>1</td>
+      <td>2</td>
+      <td>50</td>
+      <td>...</td>
+      <td>6</td>
+      <td>6</td>
+      <td>1</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>1</td>
+      <td>10</td>
+    </tr>
+    <tr>
+      <th>5</th>
+      <td>M. Emanuel-Carr</td>
+      <td>Hatters</td>
+      <td>11:01</td>
+      <td>7</td>
+      <td>2</td>
+      <td>4</td>
+      <td>50</td>
+      <td>2</td>
+      <td>4</td>
+      <td>50</td>
+      <td>...</td>
+      <td>1</td>
+      <td>1</td>
+      <td>3</td>
+      <td>2</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>2</td>
+      <td>7</td>
+    </tr>
+    <tr>
+      <th>6</th>
+      <td>C. Drennan</td>
+      <td>Hatters</td>
+      <td>18:13</td>
+      <td>9</td>
+      <td>3</td>
+      <td>3</td>
+      <td>100</td>
+      <td>1</td>
+      <td>1</td>
+      <td>100</td>
+      <td>...</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>3</td>
+      <td>4</td>
+      <td>-2</td>
+    </tr>
+    <tr>
+      <th>7</th>
+      <td>E. Nibbelink</td>
+      <td>Hatters</td>
+      <td>5:17</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>...</td>
+      <td>1</td>
+      <td>1</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+    </tr>
+    <tr>
+      <th>8</th>
+      <td>S. Harrison</td>
+      <td>Hatters</td>
+      <td>17:21</td>
+      <td>7</td>
+      <td>3</td>
+      <td>8</td>
+      <td>37</td>
+      <td>3</td>
+      <td>6</td>
+      <td>50</td>
+      <td>...</td>
+      <td>4</td>
+      <td>4</td>
+      <td>1</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>2</td>
+      <td>2</td>
+      <td>-2</td>
+    </tr>
+    <tr>
+      <th>9</th>
+      <td>L. Wright-Ponder</td>
+      <td>Hatters</td>
+      <td>9:30</td>
+      <td>6</td>
+      <td>3</td>
+      <td>6</td>
+      <td>50</td>
+      <td>3</td>
+      <td>6</td>
+      <td>50</td>
+      <td>...</td>
+      <td>1</td>
+      <td>4</td>
+      <td>0</td>
+      <td>3</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>5</td>
+      <td>1</td>
+      <td>-4</td>
+    </tr>
+    <tr>
+      <th>10</th>
+      <td>M. Domenger</td>
+      <td>Gladiators</td>
+      <td>22:47</td>
+      <td>8</td>
+      <td>2</td>
+      <td>6</td>
+      <td>33</td>
+      <td>2</td>
+      <td>4</td>
+      <td>50</td>
+      <td>...</td>
+      <td>3</td>
+      <td>5</td>
+      <td>3</td>
+      <td>4</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>4</td>
+      <td>3</td>
+      <td>-3</td>
+    </tr>
+    <tr>
+      <th>11</th>
+      <td>H. Robb</td>
+      <td>Gladiators</td>
+      <td>23:43</td>
+      <td>2</td>
+      <td>1</td>
+      <td>4</td>
+      <td>25</td>
+      <td>1</td>
+      <td>2</td>
+      <td>50</td>
+      <td>...</td>
+      <td>2</td>
+      <td>2</td>
+      <td>4</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>2</td>
+      <td>1</td>
+      <td>-15</td>
+    </tr>
+    <tr>
+      <th>12</th>
+      <td>E. Mcgarrachan</td>
+      <td>Gladiators</td>
+      <td>31:12</td>
+      <td>9</td>
+      <td>3</td>
+      <td>13</td>
+      <td>23</td>
+      <td>2</td>
+      <td>10</td>
+      <td>20</td>
+      <td>...</td>
+      <td>3</td>
+      <td>7</td>
+      <td>3</td>
+      <td>3</td>
+      <td>2</td>
+      <td>0</td>
+      <td>0</td>
+      <td>5</td>
+      <td>2</td>
+      <td>-10</td>
+    </tr>
+    <tr>
+      <th>13</th>
+      <td>K. Tudor</td>
+      <td>Gladiators</td>
+      <td>30:41</td>
+      <td>22</td>
+      <td>9</td>
+      <td>16</td>
+      <td>56</td>
+      <td>6</td>
+      <td>9</td>
+      <td>66</td>
+      <td>...</td>
+      <td>4</td>
+      <td>5</td>
+      <td>0</td>
+      <td>1</td>
+      <td>2</td>
+      <td>1</td>
+      <td>1</td>
+      <td>2</td>
+      <td>3</td>
+      <td>-9</td>
+    </tr>
+    <tr>
+      <th>14</th>
+      <td>K. Brown</td>
+      <td>Gladiators</td>
+      <td>21:17</td>
+      <td>2</td>
+      <td>1</td>
+      <td>1</td>
+      <td>100</td>
+      <td>1</td>
+      <td>1</td>
+      <td>100</td>
+      <td>...</td>
+      <td>0</td>
+      <td>4</td>
+      <td>1</td>
+      <td>6</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>4</td>
+      <td>1</td>
+      <td>-6</td>
+    </tr>
+    <tr>
+      <th>15</th>
+      <td>R. Lewis</td>
+      <td>Gladiators</td>
+      <td>15:48</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>...</td>
+      <td>0</td>
+      <td>1</td>
+      <td>2</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>2</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <th>16</th>
+      <td>T. Adams</td>
+      <td>Gladiators</td>
+      <td>21:36</td>
+      <td>9</td>
+      <td>4</td>
+      <td>10</td>
+      <td>40</td>
+      <td>3</td>
+      <td>9</td>
+      <td>33</td>
+      <td>...</td>
+      <td>3</td>
+      <td>3</td>
+      <td>2</td>
+      <td>1</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>5</td>
+      <td>2</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <th>17</th>
+      <td>E. Kerr</td>
+      <td>Gladiators</td>
+      <td>0:00</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>...</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <th>18</th>
+      <td>D. Bryne</td>
+      <td>Gladiators</td>
+      <td>27:21</td>
+      <td>22</td>
+      <td>5</td>
+      <td>11</td>
+      <td>45</td>
+      <td>0</td>
+      <td>2</td>
+      <td>0</td>
+      <td>...</td>
+      <td>4</td>
+      <td>5</td>
+      <td>1</td>
+      <td>5</td>
+      <td>4</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>5</td>
+      <td>-4</td>
+    </tr>
+    <tr>
+      <th>19</th>
+      <td>A. Mcintosh</td>
+      <td>Gladiators</td>
+      <td>0:00</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>...</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <th>20</th>
+      <td>K. Mcghee</td>
+      <td>Gladiators</td>
+      <td>5:35</td>
+      <td>2</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>...</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>2</td>
+      <td>1</td>
+      <td>-3</td>
+    </tr>
+  </tbody>
+</table>
+<p>21 rows × 27 columns</p>
+</div></div></div>
+</div>
+<p>Before we do any further analysis, I’m going to remove (“drop”) any players who didn’t actually get on to the court. I’m also going to reset the indices of the dataframe, although this isn’t strictly necessary.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">no_game_time</span> <span class="o">=</span> <span class="s1">&#39;0:00&#39;</span>
+<span class="n">boxscores_df</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">boxscores_df</span><span class="p">[</span><span class="n">boxscores_df</span><span class="o">.</span><span class="n">Mins</span> <span class="o">==</span> <span class="n">no_game_time</span><span class="p">]</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">boxscores_df</span><span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">drop</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<section id="calculating-the-performance-index">
+<h2>Calculating the performance index<a class="headerlink" href="#calculating-the-performance-index" title="Link to this heading">#</a></h2>
+<p>The performance index is a commonly used stat in FIBA games, which attempts to assign a single score to a player’s overall contribution to the game (the higher the index, the better the performance). I’m not a big fan of trying to summarise a player’s contribution as a single number, and my opinion is that the performance index is a pretty crude way of putting together that number. Seth Partnow writes about this a lot better than I ever could in his book “The Midrange Theory”, and I’d recommend giving it a read. However, let’s go ahead and calculate the index regardless.</p>
+<p>The formula used is:</p>
+<p>Performance index = (points + rebounds + assists + steals + blocks + fouls drawn) - (missed field goals + missed free throws + turnovers + shots rejected + fouls committed)</p>
+<p>We can define a function to calculate this for us.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">performance_index</span><span class="p">(</span><span class="n">pts</span><span class="p">,</span> <span class="n">rebs</span><span class="p">,</span> <span class="n">assists</span><span class="p">,</span> <span class="n">steals</span><span class="p">,</span> <span class="n">block</span><span class="p">,</span> <span class="n">foulson</span><span class="p">,</span> <span class="n">mfg</span><span class="p">,</span> <span class="n">mft</span><span class="p">,</span> <span class="n">tos</span><span class="p">,</span> <span class="n">rejected</span><span class="p">,</span> <span class="n">fouls</span><span class="p">):</span>
+    <span class="n">positive_part</span> <span class="o">=</span> <span class="n">pts</span> <span class="o">+</span> <span class="n">rebs</span> <span class="o">+</span> <span class="n">assists</span> <span class="o">+</span> <span class="n">steals</span> <span class="o">+</span> <span class="n">block</span> <span class="o">+</span> <span class="n">foulson</span>
+    <span class="n">negative_part</span> <span class="o">=</span> <span class="n">mfg</span> <span class="o">+</span> <span class="n">mft</span> <span class="o">+</span> <span class="n">tos</span> <span class="o">+</span> <span class="n">rejected</span> <span class="o">+</span> <span class="n">fouls</span>
+    <span class="n">total</span> <span class="o">=</span> <span class="n">positive_part</span> <span class="o">-</span> <span class="n">negative_part</span>
+
+    <span class="k">return</span> <span class="n">total</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>We now use a lambda function to calculate the performance index for each row (player) in the boxscore dataframe.</p>
+<p>Note that the boxscore doesn’t contain the number of shots missed, so we calculate these “on the fly” as the difference between the shots attempted and the shots scored.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">boxscores_df</span><span class="p">[</span><span class="s1">&#39;Index&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">boxscores_df</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">performance_index</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="s1">&#39;PTS&#39;</span><span class="p">],</span> <span class="n">x</span><span class="p">[</span><span class="s1">&#39;REB&#39;</span><span class="p">],</span> <span class="n">x</span><span class="p">[</span><span class="s1">&#39;AST&#39;</span><span class="p">],</span> <span class="n">x</span><span class="p">[</span><span class="s1">&#39;STL&#39;</span><span class="p">],</span>
+                                                                       <span class="n">x</span><span class="p">[</span><span class="s1">&#39;BLK&#39;</span><span class="p">],</span> <span class="n">x</span><span class="p">[</span><span class="s1">&#39;FOULON&#39;</span><span class="p">],</span> <span class="n">x</span><span class="p">[</span><span class="s1">&#39;FGA&#39;</span><span class="p">]</span><span class="o">-</span><span class="n">x</span><span class="p">[</span><span class="s1">&#39;FGM&#39;</span><span class="p">],</span> <span class="n">x</span><span class="p">[</span><span class="s1">&#39;FTA&#39;</span><span class="p">]</span><span class="o">-</span><span class="n">x</span><span class="p">[</span><span class="s1">&#39;FTM&#39;</span><span class="p">],</span> 
+                                                                       <span class="n">x</span><span class="p">[</span><span class="s1">&#39;TO&#39;</span><span class="p">],</span> <span class="n">x</span><span class="p">[</span><span class="s1">&#39;BLKR&#39;</span><span class="p">],</span> <span class="n">x</span><span class="p">[</span><span class="s1">&#39;PF&#39;</span><span class="p">]),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>As a first exploration of this data, we can ask pandas to calculate some statistics (mean, standard deviation etc) of the Index for the whole dataframe. This will tell us, for example, the mean average Index for everyone who played in the game.</p>
+<div class="alert alert-block alert-info">
+<b>Note:</b> Take care to avoid doing too much analysis when you've got a small statistical sample. To draw out trends and evaluate players you probably want to average statistical quantities over several games, but the code presented here could be re-used for this kind of purpose. Here, we are simply analysing perfromance in a single game.</div><div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">boxscores_df</span><span class="p">[</span><span class="s1">&#39;Index&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">describe</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>count    19.000000
+mean      8.526316
+std       8.275589
+min      -2.000000
+25%       3.000000
+50%       5.000000
+75%      14.000000
+max      24.000000
+Name: Index, dtype: float64
+</pre></div>
+</div>
+</div>
+</div>
+<p>Looking at these stats, we can see that the average Performance Index in the game was around 8.5, but the standard deviation is roughly the same. This tells us there is a wide distribution of the Index values and the average isn’t too useful as a general indicator (not a surprise given what we’re looking at).</p>
+<p>It often helps to visualise data too. Here we will use matplotlib to show points scored on the x-axis and the Performance Index on the y-axis.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Select a font and background colour, then plot the data as a scatter plot</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">rcParams</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s1">&#39;font.family&#39;</span><span class="p">:</span><span class="s1">&#39;Avenir&#39;</span><span class="p">})</span>
+<span class="n">bgcol</span> <span class="o">=</span> <span class="s1">&#39;#fafafa&#39;</span>
+<span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mf">3.5</span><span class="p">,</span> <span class="mf">3.5</span><span class="p">),</span> <span class="n">dpi</span><span class="o">=</span><span class="mi">240</span><span class="p">)</span>
+<span class="n">fig</span><span class="o">.</span><span class="n">set_facecolor</span><span class="p">(</span><span class="n">bgcol</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_facecolor</span><span class="p">(</span><span class="n">bgcol</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">boxscores_df</span><span class="p">[</span><span class="s1">&#39;PTS&#39;</span><span class="p">],</span> <span class="n">boxscores_df</span><span class="p">[</span><span class="s1">&#39;Index&#39;</span><span class="p">])</span>
+
+<span class="c1"># Adjust which axis lines are drawn and their formatting</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">spines</span><span class="p">[</span><span class="s1">&#39;right&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">set_visible</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">spines</span><span class="p">[</span><span class="s1">&#39;top&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">set_visible</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">spines</span><span class="p">[</span><span class="s1">&#39;left&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">set_color</span><span class="p">(</span><span class="s1">&#39;#ccc8c8&#39;</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">spines</span><span class="p">[</span><span class="s1">&#39;bottom&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">set_color</span><span class="p">(</span><span class="s1">&#39;#ccc8c8&#39;</span><span class="p">)</span>
+
+<span class="c1"># Adjust the axis ticks</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">tick_params</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="n">labelsize</span><span class="o">=</span><span class="mi">12</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;#ccc8c8&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">tick_params</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="s1">&#39;y&#39;</span><span class="p">,</span> <span class="n">labelsize</span><span class="o">=</span><span class="mi">12</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;#ccc8c8&#39;</span><span class="p">)</span>
+
+<span class="c1"># Add some better labels</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;Points per game&#39;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;#575654&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;Performance Index&#39;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;#575654&#39;</span><span class="p">)</span>
+
+<span class="c1">#Add an &quot;indentity&quot; line that shows when the x and y values are the same</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">((</span><span class="mi">0</span><span class="p">,</span> <span class="mi">25</span><span class="p">),</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">25</span><span class="p">),</span> <span class="s1">&#39;k-&#39;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.75</span><span class="p">,</span> <span class="n">zorder</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>[&lt;matplotlib.lines.Line2D at 0x121c710d0&gt;]
+</pre></div>
+</div>
+<img alt="_images/bd83e96283a969b5b494422a46c229db8235d365034591389f83e61c0792d507.png" src="_images/bd83e96283a969b5b494422a46c229db8235d365034591389f83e61c0792d507.png" />
+</div>
+</div>
+<p>We could spend time making this plot look better if we were going to present it to others, for example, on social media, but here we are simply aiming to quickly inspect the data.</p>
+<p>As the majority of the circles on the plot lie close to the y = x line, we can see that the Performance Index shows a pretty strong correlation with the points scored (which is one of the common criticisms of Performance Index). In other words, the trend in this data is that the Index isn’t really telling us much more than simply looking at the points scored.</p>
+<p>What may be more useful here is to look at the difference between the Index and points scored, this will help us identify which players had a good game that wasn’t just scoring lots of points. We can do that through calculating a new column in the dataframe, which I will call “Diff” (for difference).</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">boxscores_df</span><span class="p">[</span><span class="s1">&#39;Diff&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">boxscores_df</span><span class="p">[</span><span class="s1">&#39;Index&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="n">boxscores_df</span><span class="p">[</span><span class="s1">&#39;PTS&#39;</span><span class="p">]</span>
+<span class="n">boxscores_df</span><span class="p">[</span><span class="s1">&#39;Diff&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">describe</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>count    19.000000
+mean      0.000000
+std       3.785939
+min      -8.000000
+25%      -2.000000
+50%       0.000000
+75%       2.000000
+max      10.000000
+Name: Diff, dtype: float64
+</pre></div>
+</div>
+</div>
+</div>
+<p>We can see that one player had an Index that was ten points higher than the number of points scored, which means they made a big contribution in other ways than just scoring. Let’s ask the dataframe for any players who’s Index is greater than the number of points plus five (so we capture any other good performances).</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">boxscores_df</span><span class="p">[</span><span class="n">boxscores_df</span><span class="o">.</span><span class="n">Diff</span> <span class="o">&gt;</span> <span class="mf">5.0</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>Name</th>
+      <th>Team</th>
+      <th>Mins</th>
+      <th>PTS</th>
+      <th>FGM</th>
+      <th>FGA</th>
+      <th>FG%</th>
+      <th>2PM</th>
+      <th>2PA</th>
+      <th>2P%</th>
+      <th>...</th>
+      <th>AST</th>
+      <th>TO</th>
+      <th>STL</th>
+      <th>BLK</th>
+      <th>BLKR</th>
+      <th>PF</th>
+      <th>FOULON</th>
+      <th>PLUSMINUS</th>
+      <th>Index</th>
+      <th>Diff</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>3</th>
+      <td>M. Washington</td>
+      <td>Hatters</td>
+      <td>31:36</td>
+      <td>12</td>
+      <td>6</td>
+      <td>9</td>
+      <td>66</td>
+      <td>6</td>
+      <td>9</td>
+      <td>66</td>
+      <td>...</td>
+      <td>4</td>
+      <td>3</td>
+      <td>5</td>
+      <td>1</td>
+      <td>0</td>
+      <td>2</td>
+      <td>2</td>
+      <td>13</td>
+      <td>22</td>
+      <td>10</td>
+    </tr>
+  </tbody>
+</table>
+<p>1 rows × 29 columns</p>
+</div></div></div>
+</div>
+<p>Okay, it’s pretty obvious in this case that Maddie Washington had the great performance, having a much bigger impact on the game than scoring 12 points would suggest.</p>
+<p>While we are investigating this, let’s take a look at all the players with a positive “Diff”, and place them in order, so that the players with the highest Diff come first. If the Diff is the same, we order by Index.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">boxscores_df</span><span class="p">[</span><span class="n">boxscores_df</span><span class="o">.</span><span class="n">Diff</span> <span class="o">&gt;</span> <span class="mf">0.0</span><span class="p">]</span><span class="o">.</span><span class="n">sort_values</span><span class="p">([</span><span class="s1">&#39;Diff&#39;</span><span class="p">,</span> <span class="s1">&#39;Index&#39;</span><span class="p">],</span> <span class="n">ascending</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>Name</th>
+      <th>Team</th>
+      <th>Mins</th>
+      <th>PTS</th>
+      <th>FGM</th>
+      <th>FGA</th>
+      <th>FG%</th>
+      <th>2PM</th>
+      <th>2PA</th>
+      <th>2P%</th>
+      <th>...</th>
+      <th>AST</th>
+      <th>TO</th>
+      <th>STL</th>
+      <th>BLK</th>
+      <th>BLKR</th>
+      <th>PF</th>
+      <th>FOULON</th>
+      <th>PLUSMINUS</th>
+      <th>Index</th>
+      <th>Diff</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>3</th>
+      <td>M. Washington</td>
+      <td>Hatters</td>
+      <td>31:36</td>
+      <td>12</td>
+      <td>6</td>
+      <td>9</td>
+      <td>66</td>
+      <td>6</td>
+      <td>9</td>
+      <td>66</td>
+      <td>...</td>
+      <td>4</td>
+      <td>3</td>
+      <td>5</td>
+      <td>1</td>
+      <td>0</td>
+      <td>2</td>
+      <td>2</td>
+      <td>13</td>
+      <td>22</td>
+      <td>10</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>N. Krisper</td>
+      <td>Hatters</td>
+      <td>33:37</td>
+      <td>15</td>
+      <td>6</td>
+      <td>10</td>
+      <td>60</td>
+      <td>5</td>
+      <td>7</td>
+      <td>71</td>
+      <td>...</td>
+      <td>5</td>
+      <td>5</td>
+      <td>2</td>
+      <td>0</td>
+      <td>0</td>
+      <td>3</td>
+      <td>3</td>
+      <td>10</td>
+      <td>18</td>
+      <td>3</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>E. Gandini</td>
+      <td>Hatters</td>
+      <td>20:30</td>
+      <td>2</td>
+      <td>1</td>
+      <td>4</td>
+      <td>25</td>
+      <td>1</td>
+      <td>2</td>
+      <td>50</td>
+      <td>...</td>
+      <td>1</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>1</td>
+      <td>10</td>
+      <td>5</td>
+      <td>3</td>
+    </tr>
+    <tr>
+      <th>17</th>
+      <td>D. Bryne</td>
+      <td>Gladiators</td>
+      <td>27:21</td>
+      <td>22</td>
+      <td>5</td>
+      <td>11</td>
+      <td>45</td>
+      <td>0</td>
+      <td>2</td>
+      <td>0</td>
+      <td>...</td>
+      <td>1</td>
+      <td>5</td>
+      <td>4</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>5</td>
+      <td>-4</td>
+      <td>24</td>
+      <td>2</td>
+    </tr>
+    <tr>
+      <th>5</th>
+      <td>M. Emanuel-Carr</td>
+      <td>Hatters</td>
+      <td>11:01</td>
+      <td>7</td>
+      <td>2</td>
+      <td>4</td>
+      <td>50</td>
+      <td>2</td>
+      <td>4</td>
+      <td>50</td>
+      <td>...</td>
+      <td>3</td>
+      <td>2</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>2</td>
+      <td>7</td>
+      <td>9</td>
+      <td>2</td>
+    </tr>
+    <tr>
+      <th>11</th>
+      <td>H. Robb</td>
+      <td>Gladiators</td>
+      <td>23:43</td>
+      <td>2</td>
+      <td>1</td>
+      <td>4</td>
+      <td>25</td>
+      <td>1</td>
+      <td>2</td>
+      <td>50</td>
+      <td>...</td>
+      <td>4</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>2</td>
+      <td>1</td>
+      <td>-15</td>
+      <td>4</td>
+      <td>2</td>
+    </tr>
+    <tr>
+      <th>15</th>
+      <td>R. Lewis</td>
+      <td>Gladiators</td>
+      <td>15:48</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>...</td>
+      <td>2</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+      <td>2</td>
+      <td>0</td>
+      <td>2</td>
+      <td>2</td>
+    </tr>
+    <tr>
+      <th>6</th>
+      <td>C. Drennan</td>
+      <td>Hatters</td>
+      <td>18:13</td>
+      <td>9</td>
+      <td>3</td>
+      <td>3</td>
+      <td>100</td>
+      <td>1</td>
+      <td>1</td>
+      <td>100</td>
+      <td>...</td>
+      <td>1</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+      <td>3</td>
+      <td>4</td>
+      <td>-2</td>
+      <td>10</td>
+      <td>1</td>
+    </tr>
+  </tbody>
+</table>
+<p>8 rows × 29 columns</p>
+</div></div></div>
+</div>
+<p>If we were to keep track of this Diff value over several games, it would help identify those players that consistently influence the game in ways that aren’t just points.</p>
+<p>Of course, your team still needs scorers too!</p>
+</section>
+<section id="calculating-the-true-shooting-percentage">
+<h2>Calculating the true shooting percentage<a class="headerlink" href="#calculating-the-true-shooting-percentage" title="Link to this heading">#</a></h2>
+<p>A common method for comparing how efficiently players shoot the ball is via the true shooting percentage. It considers all three types of shooting that appears in a boxscore (2 pointers, 3 pointers and free-throws) in the same metric. The common abbreviation used for true shooting is TS%.</p>
+<div class="math notranslate nohighlight">
+\[\textrm{TS}\% = \frac{\textrm{PTS}}{2\left(\textrm{FGA} + \left(0.44 \times \textrm{FTA} \right) \right)}\]</div>
+<p>To be able to analyse TS% for this game, let’s first define a function to calculate this “advanced stat”.</p>
+<div class="alert alert-block alert-info">
+<b>Note:</b> If a player hasn't attempted any shots (field goals or free throws) then the above formula will attempt to divide the number of points by zero, which is mathematically undefined and will give an error. We will use some logic to return a TS% of zero in such cases.</div><div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">true_shooting</span><span class="p">(</span><span class="n">pts</span><span class="p">,</span> <span class="n">fga</span><span class="p">,</span> <span class="n">fta</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">fga</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">fta</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">ts</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">denominator</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="p">(</span><span class="n">fga</span> <span class="o">+</span> <span class="p">(</span><span class="mf">0.44</span> <span class="o">*</span> <span class="n">fta</span><span class="p">))</span>
+        <span class="n">ts</span> <span class="o">=</span> <span class="n">pts</span> <span class="o">/</span> <span class="n">denominator</span>
+
+    <span class="k">return</span> <span class="n">ts</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>Now we use a lambda to compute this for all of the players in the dataframe.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">boxscores_df</span><span class="p">[</span><span class="s1">&#39;TS%&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">boxscores_df</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">true_shooting</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="s1">&#39;PTS&#39;</span><span class="p">],</span> <span class="n">x</span><span class="p">[</span><span class="s1">&#39;FGA&#39;</span><span class="p">],</span> <span class="n">x</span><span class="p">[</span><span class="s1">&#39;FTA&#39;</span><span class="p">]),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>As a first step in analysing this, we can compute the summary statistics of TS%, and look at a sorted slice of the dataframe.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">boxscores_df</span><span class="p">[</span><span class="s1">&#39;TS%&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">describe</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>count    19.000000
+mean      0.532593
+std       0.313783
+min       0.000000
+25%       0.369450
+50%       0.531915
+75%       0.672388
+max       1.308140
+Name: TS%, dtype: float64
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">boxscores_df</span><span class="p">[[</span><span class="s1">&#39;Name&#39;</span><span class="p">,</span> <span class="s1">&#39;Team&#39;</span><span class="p">,</span> <span class="s1">&#39;TS%&#39;</span><span class="p">]]</span><span class="o">.</span><span class="n">sort_values</span><span class="p">([</span><span class="s1">&#39;TS%&#39;</span><span class="p">],</span> <span class="n">ascending</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>Name</th>
+      <th>Team</th>
+      <th>TS%</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>6</th>
+      <td>C. Drennan</td>
+      <td>Hatters</td>
+      <td>1.308140</td>
+    </tr>
+    <tr>
+      <th>14</th>
+      <td>K. Brown</td>
+      <td>Gladiators</td>
+      <td>1.000000</td>
+    </tr>
+    <tr>
+      <th>17</th>
+      <td>D. Bryne</td>
+      <td>Gladiators</td>
+      <td>0.757576</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>N. Krisper</td>
+      <td>Hatters</td>
+      <td>0.689338</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>G. Gayle</td>
+      <td>Hatters</td>
+      <td>0.675676</td>
+    </tr>
+    <tr>
+      <th>13</th>
+      <td>K. Tudor</td>
+      <td>Gladiators</td>
+      <td>0.669100</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>M. Washington</td>
+      <td>Hatters</td>
+      <td>0.666667</td>
+    </tr>
+    <tr>
+      <th>5</th>
+      <td>M. Emanuel-Carr</td>
+      <td>Hatters</td>
+      <td>0.657895</td>
+    </tr>
+    <tr>
+      <th>0</th>
+      <td>L. Zolper</td>
+      <td>Hatters</td>
+      <td>0.541516</td>
+    </tr>
+    <tr>
+      <th>18</th>
+      <td>K. Mcghee</td>
+      <td>Gladiators</td>
+      <td>0.531915</td>
+    </tr>
+    <tr>
+      <th>10</th>
+      <td>M. Domenger</td>
+      <td>Gladiators</td>
+      <td>0.515464</td>
+    </tr>
+    <tr>
+      <th>9</th>
+      <td>L. Wright-Ponder</td>
+      <td>Hatters</td>
+      <td>0.436047</td>
+    </tr>
+    <tr>
+      <th>16</th>
+      <td>T. Adams</td>
+      <td>Gladiators</td>
+      <td>0.431034</td>
+    </tr>
+    <tr>
+      <th>8</th>
+      <td>S. Harrison</td>
+      <td>Hatters</td>
+      <td>0.414692</td>
+    </tr>
+    <tr>
+      <th>12</th>
+      <td>E. Mcgarrachan</td>
+      <td>Gladiators</td>
+      <td>0.324207</td>
+    </tr>
+    <tr>
+      <th>11</th>
+      <td>H. Robb</td>
+      <td>Gladiators</td>
+      <td>0.250000</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>E. Gandini</td>
+      <td>Hatters</td>
+      <td>0.250000</td>
+    </tr>
+    <tr>
+      <th>7</th>
+      <td>E. Nibbelink</td>
+      <td>Hatters</td>
+      <td>0.000000</td>
+    </tr>
+    <tr>
+      <th>15</th>
+      <td>R. Lewis</td>
+      <td>Gladiators</td>
+      <td>0.000000</td>
+    </tr>
+  </tbody>
+</table>
+</div></div></div>
+</div>
+<p>A first reaction here may be “wow, a player has a true shooting percentage of 130%, how does this make sense?”. There are (at least) two things going on here. The first is that TS% can give values of greater than 100%, which is a minor problem with this particular stat, and the second is that a single game is a very small sample size, where “outliers” like this are more likely to happen.</p>
+<p>Still, it looks like Carla Drennan of the Hatters had an excellent game in terms of shooting. By looking at a subset of their game stats, we can confirm that.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">boxscores_df</span><span class="p">[[</span><span class="s1">&#39;Name&#39;</span><span class="p">,</span> <span class="s1">&#39;Team&#39;</span><span class="p">,</span> <span class="s1">&#39;PTS&#39;</span><span class="p">,</span> <span class="s1">&#39;FGM&#39;</span><span class="p">,</span> <span class="s1">&#39;FGA&#39;</span><span class="p">,</span> <span class="s1">&#39;FG%&#39;</span><span class="p">,</span> <span class="s1">&#39;3PM&#39;</span><span class="p">,</span> <span class="s1">&#39;3PA&#39;</span><span class="p">,</span> <span class="s1">&#39;3P%&#39;</span><span class="p">,</span>
+             <span class="s1">&#39;FTA&#39;</span><span class="p">,</span> <span class="s1">&#39;FTM&#39;</span><span class="p">,</span> <span class="s1">&#39;FT%&#39;</span><span class="p">,</span> <span class="s1">&#39;TS%&#39;</span><span class="p">]]</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">boxscores_df</span><span class="p">[</span><span class="s1">&#39;Name&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;C. Drennan&#39;</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>Name</th>
+      <th>Team</th>
+      <th>PTS</th>
+      <th>FGM</th>
+      <th>FGA</th>
+      <th>FG%</th>
+      <th>3PM</th>
+      <th>3PA</th>
+      <th>3P%</th>
+      <th>FTA</th>
+      <th>FTM</th>
+      <th>FT%</th>
+      <th>TS%</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>6</th>
+      <td>C. Drennan</td>
+      <td>Hatters</td>
+      <td>9</td>
+      <td>3</td>
+      <td>3</td>
+      <td>100</td>
+      <td>2</td>
+      <td>2</td>
+      <td>100</td>
+      <td>1</td>
+      <td>1</td>
+      <td>100</td>
+      <td>1.30814</td>
+    </tr>
+  </tbody>
+</table>
+</div></div></div>
+</div>
+<p>Now we see that Carla had a perfect shooting night, scoring every 3 pointer (2 of them), 2 pointer (1 of them), and free throw (1 of them) attempted. As they made all of the shots, and some of them were 3 pointers, this explains the TS% that is greater than 100.</p>
+<p>It’s important to consider the shot volume (how many shots have been attempted) as well as the efficiency - you can think of this in terms of getting the hot hand the ball.</p>
+<p>This is best visualised as a plot of TS% against field goal attempts.</p>
+<div class="alert alert-block alert-info">
+<b>Note:</b> The FGA doesn't account for free throws. It probably doesn't matter too much here, but in principle one could design some sort of weighted shots metric that accounts for FTA (and possibly weights 2PT and 3PT differently). Another alternative could be to consider "Usage", but I will leave that for another Chapter.</div><div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">rcParams</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s1">&#39;font.family&#39;</span><span class="p">:</span><span class="s1">&#39;Avenir&#39;</span><span class="p">})</span>
+<span class="n">bgcol</span> <span class="o">=</span> <span class="s1">&#39;#fafafa&#39;</span>
+
+<span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mf">3.5</span><span class="p">,</span> <span class="mf">3.5</span><span class="p">),</span> <span class="n">dpi</span><span class="o">=</span><span class="mi">240</span><span class="p">)</span>
+<span class="n">fig</span><span class="o">.</span><span class="n">set_facecolor</span><span class="p">(</span><span class="n">bgcol</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_facecolor</span><span class="p">(</span><span class="n">bgcol</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">boxscores_df</span><span class="p">[</span><span class="s1">&#39;FGA&#39;</span><span class="p">],</span> <span class="n">boxscores_df</span><span class="p">[</span><span class="s1">&#39;TS%&#39;</span><span class="p">])</span>
+
+<span class="n">ax</span><span class="o">.</span><span class="n">spines</span><span class="p">[</span><span class="s1">&#39;right&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">set_visible</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">spines</span><span class="p">[</span><span class="s1">&#39;top&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">set_visible</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">spines</span><span class="p">[</span><span class="s1">&#39;left&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">set_color</span><span class="p">(</span><span class="s1">&#39;#ccc8c8&#39;</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">spines</span><span class="p">[</span><span class="s1">&#39;bottom&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">set_color</span><span class="p">(</span><span class="s1">&#39;#ccc8c8&#39;</span><span class="p">)</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">tick_params</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="n">labelsize</span><span class="o">=</span><span class="mi">12</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;#ccc8c8&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">tick_params</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="s1">&#39;y&#39;</span><span class="p">,</span> <span class="n">labelsize</span><span class="o">=</span><span class="mi">12</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;#ccc8c8&#39;</span><span class="p">)</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;Field Goal Attempts&#39;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;#575654&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;True Shooting Percentage&#39;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;#575654&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Text(0, 0.5, &#39;True Shooting Percentage&#39;)
+</pre></div>
+</div>
+<img alt="_images/a4eefbc518510ad84283c79b82e690456c0114d1a22494340d53817418d8700a.png" src="_images/a4eefbc518510ad84283c79b82e690456c0114d1a22494340d53817418d8700a.png" />
+</div>
+</div>
+<p>There’s probably too many points here and it distracts from the analysis we want - in this case, players with a good TS% and reasonable volume of shots. Here I will create a new dataframe that only contains the players who took more than 2 shots and have a TS% between 0.5 and 1.0 (we already know that Drennan was perfect from the floor).</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">shooters_df</span> <span class="o">=</span> <span class="n">boxscores_df</span><span class="p">[(</span><span class="n">boxscores_df</span><span class="o">.</span><span class="n">FGA</span> <span class="o">&gt;</span> <span class="mi">2</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">boxscores_df</span><span class="p">[</span><span class="s2">&quot;TS%&quot;</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mf">0.5</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">boxscores_df</span><span class="p">[</span><span class="s2">&quot;TS%&quot;</span><span class="p">]</span> <span class="o">&lt;</span> <span class="mf">1.0</span><span class="p">)]</span>
+<span class="n">shooters_df</span><span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">drop</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="nb">len</span><span class="p">(</span><span class="n">shooters_df</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>8
+</pre></div>
+</div>
+</div>
+</div>
+<p>That’s left us with 8 players, so let’s plot that again. We will also add the player names as annotations to the points.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">rcParams</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s1">&#39;font.family&#39;</span><span class="p">:</span><span class="s1">&#39;Avenir&#39;</span><span class="p">})</span>
+<span class="n">bgcol</span> <span class="o">=</span> <span class="s1">&#39;#fafafa&#39;</span>
+
+<span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mf">3.5</span><span class="p">,</span> <span class="mf">3.5</span><span class="p">),</span> <span class="n">dpi</span><span class="o">=</span><span class="mi">240</span><span class="p">)</span>
+<span class="n">fig</span><span class="o">.</span><span class="n">set_facecolor</span><span class="p">(</span><span class="n">bgcol</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_facecolor</span><span class="p">(</span><span class="n">bgcol</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">shooters_df</span><span class="p">[</span><span class="s1">&#39;FGA&#39;</span><span class="p">],</span> <span class="n">shooters_df</span><span class="p">[</span><span class="s1">&#39;TS%&#39;</span><span class="p">])</span>
+
+<span class="n">ax</span><span class="o">.</span><span class="n">spines</span><span class="p">[</span><span class="s1">&#39;right&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">set_visible</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">spines</span><span class="p">[</span><span class="s1">&#39;top&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">set_visible</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">spines</span><span class="p">[</span><span class="s1">&#39;left&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">set_color</span><span class="p">(</span><span class="s1">&#39;#ccc8c8&#39;</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">spines</span><span class="p">[</span><span class="s1">&#39;bottom&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">set_color</span><span class="p">(</span><span class="s1">&#39;#ccc8c8&#39;</span><span class="p">)</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">tick_params</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="n">labelsize</span><span class="o">=</span><span class="mi">12</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;#ccc8c8&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">tick_params</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="s1">&#39;y&#39;</span><span class="p">,</span> <span class="n">labelsize</span><span class="o">=</span><span class="mi">12</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;#ccc8c8&#39;</span><span class="p">)</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;Field Goal Attempts&#39;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;#575654&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;True Shooting Percentage&#39;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;#575654&#39;</span><span class="p">)</span>
+
+<span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">shooters_df</span><span class="o">.</span><span class="n">iterrows</span><span class="p">():</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">annotate</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;Name&#39;</span><span class="p">],</span> <span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;FGA&#39;</span><span class="p">],</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;TS%&#39;</span><span class="p">]),</span> <span class="n">xytext</span><span class="o">=</span><span class="p">(</span><span class="mf">4.5</span><span class="p">,</span> <span class="o">-</span><span class="mf">2.5</span><span class="p">),</span> <span class="n">textcoords</span><span class="o">=</span><span class="s1">&#39;offset points&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="_images/8ba562a854dd3571c8e3ba37a5da6100ea9b54fb0cf5ff18764925b51557d483.png" src="_images/8ba562a854dd3571c8e3ba37a5da6100ea9b54fb0cf5ff18764925b51557d483.png" />
+</div>
+</div>
+<p>There’s a “seam” of good shooting performances with a TS% greater than 0.65 and decent volume. The ideal here is for players to be in the upper right corner and that allows us to identify Delaynie Bryne and Katharine Tudor as two of the top performers in this game.</p>
+<p>Repeating this type of analysis for a team over several games allows the statistical outlier performances to “regress to the mean” and the real true shooters to be identified.</p>
+</section>
+</section>
+
+    <script type="text/x-thebe-config">
+    {
+        requestKernel: true,
+        binderOptions: {
+            repo: "binder-examples/jupyter-stacks-datascience",
+            ref: "master",
+        },
+        codeMirrorConfig: {
+            theme: "abcdef",
+            mode: "python"
+        },
+        kernelOptions: {
+            name: "python3",
+            path: "./."
+        },
+        predefinedOutput: true
+    }
+    </script>
+    <script>kernelName = 'python3'</script>
+
+                </article>
+              
+
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="SLB_boxscore_scrape.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">SLB boxscore data scrape</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="resources.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">Further resources</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+  <div class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> Contents
+  </div>
+  <nav class="bd-toc-nav page-toc">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#calculating-the-performance-index">Calculating the performance index</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#calculating-the-true-shooting-percentage">Calculating the true shooting percentage</a></li>
+</ul>
+  </nav></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+<div class="bd-footer-content__inner container">
+  
+  <div class="footer-item">
+    
+<p class="component-author">
+By Grant Hill (@jumpshot_theory)
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+
+  <p class="copyright">
+    
+      © Copyright 2024.
+      <br/>
+    
+  </p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+</div>
+          </footer>
+        
+
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b"></script>
+<script src="_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+  <footer class="bd-footer">
+  </footer>
+  </body>
+</html>
