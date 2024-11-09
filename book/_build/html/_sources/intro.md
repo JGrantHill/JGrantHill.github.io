@@ -56,7 +56,8 @@ It is up to you to evaluate the code, and this is especially the case if you mak
 
 ## Recent Changes
 
-- Initial version of the site, with most of the content focused on scraping data from websites.
+- WIP version of a Chapter on working with boxscore data.
+- Initial version of the book, with most of the content focused on scraping data from websites.
 
 ## Want to Work Together on this Book?
 
@@ -64,7 +65,8 @@ If you'd like to contribute to this book, please get in touch. I'm happy to have
 
 ## Planned Future Updates
 
-- Working with box score data to calculate more advanced stats.
+- Working with boxscore data to calculate team-level stats.
+- Combining boxscores over multiple games and cleaning up the data.
 - Scraping team efficiency data from BritHoops and analysing it via plots.
 
 ## Acknowledgements
