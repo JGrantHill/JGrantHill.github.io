@@ -383,8 +383,16 @@ document.write(`
             </div>
             <nav aria-label="Page">
                 <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#calculating-the-performance-index">Calculating the performance index</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#calculating-the-true-shooting-percentage">Calculating the true shooting percentage</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#player-level-stats">Player-level stats</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#calculating-the-performance-index">Calculating the performance index</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#calculating-the-true-shooting-percentage">Calculating the true shooting percentage</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#exercises">Exercises</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#team-level-stats">Team-level stats</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#possessions">Possessions</a></li>
+</ul>
+</li>
 </ul>
             </nav>
         </div>
@@ -992,8 +1000,10 @@ document.write(`
 </div>
 </div>
 </div>
+<section id="player-level-stats">
+<h2>Player-level stats<a class="headerlink" href="#player-level-stats" title="Link to this heading">#</a></h2>
 <section id="calculating-the-performance-index">
-<h2>Calculating the performance index<a class="headerlink" href="#calculating-the-performance-index" title="Link to this heading">#</a></h2>
+<h3>Calculating the performance index<a class="headerlink" href="#calculating-the-performance-index" title="Link to this heading">#</a></h3>
 <p>The performance index is a commonly used stat in FIBA games, which attempts to assign a single score to a player’s overall contribution to the game (the higher the index, the better the performance). I’m not a big fan of trying to summarise a player’s contribution as a single number, and my opinion is that the performance index is a pretty crude way of putting together that number. Seth Partnow writes about this a lot better than I ever could in his book “The Midrange Theory”, and I’d recommend giving it a read. However, let’s go ahead and calculate the index regardless.</p>
 <p>The formula used is:</p>
 <p>Performance index = (points + rebounds + assists + steals + blocks + fouls drawn) - (missed field goals + missed free throws + turnovers + shots rejected + fouls committed)</p>
@@ -1433,7 +1443,7 @@ Name: Diff, dtype: float64
 <p>Of course, your team still needs scorers too!</p>
 </section>
 <section id="calculating-the-true-shooting-percentage">
-<h2>Calculating the true shooting percentage<a class="headerlink" href="#calculating-the-true-shooting-percentage" title="Link to this heading">#</a></h2>
+<h3>Calculating the true shooting percentage<a class="headerlink" href="#calculating-the-true-shooting-percentage" title="Link to this heading">#</a></h3>
 <p>A common method for comparing how efficiently players shoot the ball is via the true shooting percentage. It considers all three types of shooting that appears in a boxscore (2 pointers, 3 pointers and free-throws) in the same metric. The common abbreviation used for true shooting is TS%.</p>
 <div class="math notranslate nohighlight">
 \[\textrm{TS}\% = \frac{\textrm{PTS}}{2\left(\textrm{FGA} + \left(0.44 \times \textrm{FTA} \right) \right)}\]</div>
@@ -1456,7 +1466,8 @@ Name: Diff, dtype: float64
 <p>Now we use a lambda to compute this for all of the players in the dataframe.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">boxscores_df</span><span class="p">[</span><span class="s1">&#39;TS%&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">boxscores_df</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">true_shooting</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="s1">&#39;PTS&#39;</span><span class="p">],</span> <span class="n">x</span><span class="p">[</span><span class="s1">&#39;FGA&#39;</span><span class="p">],</span> <span class="n">x</span><span class="p">[</span><span class="s1">&#39;FTA&#39;</span><span class="p">]),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">boxscores_df</span><span class="p">[</span><span class="s1">&#39;TS%&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">boxscores_df</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">true_shooting</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="s1">&#39;PTS&#39;</span><span class="p">],</span> <span class="n">x</span><span class="p">[</span><span class="s1">&#39;FGA&#39;</span><span class="p">],</span> 
+                                                                 <span class="n">x</span><span class="p">[</span><span class="s1">&#39;FTA&#39;</span><span class="p">]),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -1697,6 +1708,8 @@ Name: TS%, dtype: float64
 </div>
 <p>Now we see that Carla had a perfect shooting night, scoring every 3 pointer (2 of them), 2 pointer (1 of them), and free throw (1 of them) attempted. As they made all of the shots, and some of them were 3 pointers, this explains the TS% that is greater than 100.</p>
 <p>It’s important to consider the shot volume (how many shots have been attempted) as well as the efficiency - you can think of this in terms of getting the hot hand the ball.</p>
+<div class="alert alert-block alert-info">
+<b>Note:</b> Dean Oliver's book "Basketball on paper" has a fascinating chapter on whether or not the "hot hand" actually exists, well worth a read. I often wish that I'd become familiar with Oliver's ideas a lot sooner - I was playing for a university team 20 years ago when the book was originally published and the approaches and ideas presented would have shaped my thinking about the game. Sometimes I wonder if I would have pursued sports analytics as a carrer, if I'd have known about it.</div>
 <p>This is best visualised as a plot of TS% against field goal attempts.</p>
 <div class="alert alert-block alert-info">
 <b>Note:</b> The FGA doesn't account for free throws. It probably doesn't matter too much here, but in principle one could design some sort of weighted shots metric that accounts for FTA (and possibly weights 2PT and 3PT differently). Another alternative could be to consider "Usage", but I will leave that for another Chapter.</div><div class="cell docutils container">
@@ -1729,7 +1742,8 @@ Name: TS%, dtype: float64
 <p>There’s probably too many points here and it distracts from the analysis we want - in this case, players with a good TS% and reasonable volume of shots. Here I will create a new dataframe that only contains the players who took more than 2 shots and have a TS% between 0.5 and 1.0 (we already know that Drennan was perfect from the floor).</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">shooters_df</span> <span class="o">=</span> <span class="n">boxscores_df</span><span class="p">[(</span><span class="n">boxscores_df</span><span class="o">.</span><span class="n">FGA</span> <span class="o">&gt;</span> <span class="mi">2</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">boxscores_df</span><span class="p">[</span><span class="s2">&quot;TS%&quot;</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mf">0.5</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">boxscores_df</span><span class="p">[</span><span class="s2">&quot;TS%&quot;</span><span class="p">]</span> <span class="o">&lt;</span> <span class="mf">1.0</span><span class="p">)]</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">shooters_df</span> <span class="o">=</span> <span class="n">boxscores_df</span><span class="p">[(</span><span class="n">boxscores_df</span><span class="o">.</span><span class="n">FGA</span> <span class="o">&gt;</span> <span class="mi">2</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">boxscores_df</span><span class="p">[</span><span class="s2">&quot;TS%&quot;</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mf">0.5</span><span class="p">)</span> <span class="o">&amp;</span> 
+    <span class="p">(</span><span class="n">boxscores_df</span><span class="p">[</span><span class="s2">&quot;TS%&quot;</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="mf">1.0</span><span class="p">)]</span>
 <span class="n">shooters_df</span><span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">drop</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="nb">len</span><span class="p">(</span><span class="n">shooters_df</span><span class="p">)</span>
 </pre></div>
@@ -1773,8 +1787,185 @@ Name: TS%, dtype: float64
 <img alt="_images/8ba562a854dd3571c8e3ba37a5da6100ea9b54fb0cf5ff18764925b51557d483.png" src="_images/8ba562a854dd3571c8e3ba37a5da6100ea9b54fb0cf5ff18764925b51557d483.png" />
 </div>
 </div>
-<p>There’s a “seam” of good shooting performances with a TS% greater than 0.65 and decent volume. The ideal here is for players to be in the upper right corner and that allows us to identify Delaynie Bryne and Katharine Tudor as two of the top performers in this game.</p>
+<p>There’s a “seam” of good shooting performances with a TS% greater than 0.65 and decent volume. The ideal here is for players to be in the upper right corner and that allows us to identify Delaynie Bryne and Katharine Tudor as two of the top shooting performers in this game.</p>
 <p>Repeating this type of analysis for a team over several games allows the statistical outlier performances to “regress to the mean” and the real true shooters to be identified.</p>
+</section>
+<section id="exercises">
+<h3>Exercises<a class="headerlink" href="#exercises" title="Link to this heading">#</a></h3>
+<p>To help solidify these concepts and the mechanics of how to calculate them, it’s a good idea to practise them a bit by repeating the exercise.</p>
+<ol class="arabic simple">
+<li><p>Load the boxscore data for a different game into a dataframe (this could be an existing CSV file, or you could flex your Python muscles and scrape a new one.</p></li>
+<li><p>Calculate the Performance Index and TS% for all of the players who saw game time.</p></li>
+<li><p>Analyse the data to identify players who played well beyond just scoring points, and those who had the best shooting nights (don’t forget to account for the volume of shots in addition to accuracy).</p></li>
+</ol>
+</section>
+</section>
+<section id="team-level-stats">
+<h2>Team-level stats<a class="headerlink" href="#team-level-stats" title="Link to this heading">#</a></h2>
+<p>When looking at player-level stats, they are automatically “normalised” by virtue of them being “per game”. However, we sometimes also normalise by looking at what the contribution would have been if the player had played for 40 minutes (“per 40”), giving some insights into how a given player who didn’t play for large stretches of the game might have done if they saw more court time.</p>
+<p>In a similar fashion, while we can look at team-level stats for a given game, it can be useful to normalise them in a different way. This leads us to…</p>
+<section id="possessions">
+<h3>Possessions<a class="headerlink" href="#possessions" title="Link to this heading">#</a></h3>
+<p>The concept of breaking the game down into “possessions” has been around a long time, with Dean Oliver mentioning that he saw it in a book by Frank McGuire (interestingly, Oliver mentions that he originally thought he’d invented the concept until he found it elsewhere). The general principle is that a team alternates possessions with the opponent and the two teams will end up with roughly the same number of possessions over the course of a game. It is not simply the number of shots as it needs to account for offensive rebounds (i.e., the team on offence still has possession), turnovers commited etc. The number of possessions in a game will also give you some indication of the pace of play - teams playing fast end up with a lot of possessions.</p>
+<p>There are various formulae used to estimate the number of possessions based on team-level stats, with varying degress of complexity. The one we will use here is:
+$<span class="math notranslate nohighlight">\(\mathrm{Possessions} = 0.96 \times \left(\mathrm{FGA} + \mathrm{TO} + 0.44 \times \mathrm{FTA} - \mathrm{OREB}\right)\)</span>$</p>
+<p>To be able to calculate this, we are going to need to sum the player-level stats on a per-team basis. One way to approach this is to create individual dataframes for each team.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">hatters_df</span> <span class="o">=</span> <span class="n">boxscores_df</span><span class="p">[</span><span class="n">boxscores_df</span><span class="p">[</span><span class="s1">&#39;Team&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;Hatters&#39;</span><span class="p">]</span>
+<span class="n">glads_df</span> <span class="o">=</span> <span class="n">boxscores_df</span><span class="p">[</span><span class="n">boxscores_df</span><span class="p">[</span><span class="s1">&#39;Team&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;Gladiators&#39;</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>We can then use the pandas “sum” function to calculate the totals we need for both teams. This is a bit convoluted, but we start by defining which columns we want, then summing them and putting them into a dictionary for each team. We then combine the dictionaries into a list of dictionaries, convert that into dataframe and finally reorder the columns in the dataframe.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">column_list</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;FGA&#39;</span><span class="p">,</span> <span class="s1">&#39;TO&#39;</span><span class="p">,</span> <span class="s1">&#39;FTA&#39;</span><span class="p">,</span> <span class="s1">&#39;OREB&#39;</span><span class="p">]</span>
+<span class="c1"># Create the dictionaries and add the team name to the dictionary</span>
+<span class="n">hatters_totals</span> <span class="o">=</span> <span class="n">hatters_df</span><span class="p">[</span><span class="n">column_list</span><span class="p">]</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span>
+<span class="n">hatters_totals</span><span class="p">[</span><span class="s1">&#39;Team&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;Hatters&#39;</span>
+<span class="n">glads_totals</span> <span class="o">=</span> <span class="n">glads_df</span><span class="p">[</span><span class="n">column_list</span><span class="p">]</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span>
+<span class="n">glads_totals</span><span class="p">[</span><span class="s1">&#39;Team&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;Gladiators&#39;</span>
+
+<span class="c1"># Make a list of dictionaries, then combine into a dataframe</span>
+<span class="n">totals</span><span class="o">=</span><span class="p">[</span><span class="n">hatters_totals</span><span class="p">,</span> <span class="n">glads_totals</span><span class="p">]</span>
+<span class="n">totals_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">totals</span><span class="p">)</span>
+
+<span class="c1"># Rearrange the dataframe</span>
+<span class="n">totals_df</span> <span class="o">=</span> <span class="n">totals_df</span><span class="p">[[</span><span class="s1">&#39;Team&#39;</span><span class="p">,</span> <span class="s1">&#39;FGA&#39;</span><span class="p">,</span> <span class="s1">&#39;TO&#39;</span><span class="p">,</span> <span class="s1">&#39;FTA&#39;</span><span class="p">,</span> <span class="s1">&#39;OREB&#39;</span><span class="p">]]</span>
+
+<span class="c1"># What does this look like?</span>
+<span class="n">totals_df</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>Team</th>
+      <th>FGA</th>
+      <th>TO</th>
+      <th>FTA</th>
+      <th>OREB</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>Hatters</td>
+      <td>59</td>
+      <td>21</td>
+      <td>27</td>
+      <td>9</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>Gladiators</td>
+      <td>63</td>
+      <td>21</td>
+      <td>18</td>
+      <td>13</td>
+    </tr>
+  </tbody>
+</table>
+</div></div></div>
+</div>
+<p>We now define a function to calculate the number of possessions. As we want an integer number of possessions, we will round this to the nearest value.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">possessions</span><span class="p">(</span><span class="n">fga</span><span class="p">,</span> <span class="n">to</span><span class="p">,</span> <span class="n">fta</span><span class="p">,</span> <span class="n">oreb</span><span class="p">):</span>
+    <span class="n">possessions</span> <span class="o">=</span> <span class="mf">0.96</span> <span class="o">*</span> <span class="p">(</span><span class="n">fga</span> <span class="o">+</span> <span class="n">to</span> <span class="o">+</span> <span class="mf">0.44</span><span class="o">*</span><span class="n">fta</span> <span class="o">-</span> <span class="n">oreb</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="nb">round</span><span class="p">(</span><span class="n">possessions</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>As we’ve done a few times, now use a lambda to calculate this for both teams.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">totals_df</span><span class="p">[</span><span class="s1">&#39;Possessions&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">totals_df</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">possessions</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="s1">&#39;FGA&#39;</span><span class="p">],</span> <span class="n">x</span><span class="p">[</span><span class="s1">&#39;TO&#39;</span><span class="p">],</span> 
+                                            <span class="n">x</span><span class="p">[</span><span class="s1">&#39;FTA&#39;</span><span class="p">],</span> <span class="n">x</span><span class="p">[</span><span class="s1">&#39;OREB&#39;</span><span class="p">]),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>Let’s take a look at the results.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">totals_df</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>Team</th>
+      <th>FGA</th>
+      <th>TO</th>
+      <th>FTA</th>
+      <th>OREB</th>
+      <th>Possessions</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>Hatters</td>
+      <td>59</td>
+      <td>21</td>
+      <td>27</td>
+      <td>9</td>
+      <td>80</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>Gladiators</td>
+      <td>63</td>
+      <td>21</td>
+      <td>18</td>
+      <td>13</td>
+      <td>76</td>
+    </tr>
+  </tbody>
+</table>
+</div></div></div>
+</div>
+<p>We can see that the Hatters had slightly more possessions, which seems to have come from the number of trips to the free-throw line they had.</p>
+</section>
 </section>
 </section>
 
@@ -1842,8 +2033,16 @@ Name: TS%, dtype: float64
   </div>
   <nav class="bd-toc-nav page-toc">
     <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#calculating-the-performance-index">Calculating the performance index</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#calculating-the-true-shooting-percentage">Calculating the true shooting percentage</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#player-level-stats">Player-level stats</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#calculating-the-performance-index">Calculating the performance index</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#calculating-the-true-shooting-percentage">Calculating the true shooting percentage</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#exercises">Exercises</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#team-level-stats">Team-level stats</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#possessions">Possessions</a></li>
+</ul>
+</li>
 </ul>
   </nav></div>
 
