@@ -391,6 +391,7 @@ document.write(`
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#team-level-stats">Team-level stats</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#possessions">Possessions</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#offensive-efficiency-rating">Offensive efficiency rating</a></li>
 </ul>
 </li>
 </ul>
@@ -1807,8 +1808,9 @@ Name: TS%, dtype: float64
 <section id="possessions">
 <h3>Possessions<a class="headerlink" href="#possessions" title="Link to this heading">#</a></h3>
 <p>The concept of breaking the game down into “possessions” has been around a long time, with Dean Oliver mentioning that he saw it in a book by Frank McGuire (interestingly, Oliver mentions that he originally thought he’d invented the concept until he found it elsewhere). The general principle is that a team alternates possessions with the opponent and the two teams will end up with roughly the same number of possessions over the course of a game. It is not simply the number of shots as it needs to account for offensive rebounds (i.e., the team on offence still has possession), turnovers commited etc. The number of possessions in a game will also give you some indication of the pace of play - teams playing fast end up with a lot of possessions.</p>
-<p>There are various formulae used to estimate the number of possessions based on team-level stats, with varying degress of complexity. The one we will use here is:
-$<span class="math notranslate nohighlight">\(\mathrm{Possessions} = 0.96 \times \left(\mathrm{FGA} + \mathrm{TO} + 0.44 \times \mathrm{FTA} - \mathrm{OREB}\right)\)</span>$</p>
+<p>There are various formulae used to estimate the number of possessions based on team-level stats, with varying degress of complexity. The one we will use here is:</p>
+<div class="math notranslate nohighlight">
+\[\mathrm{Possessions} = 0.96 \times \left(\mathrm{FGA} + \mathrm{TO} + 0.44 \times \mathrm{FTA} - \mathrm{OREB}\right)\]</div>
 <p>To be able to calculate this, we are going to need to sum the player-level stats on a per-team basis. One way to approach this is to create individual dataframes for each team.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
@@ -1819,21 +1821,25 @@ $<span class="math notranslate nohighlight">\(\mathrm{Possessions} = 0.96 \times
 </div>
 </div>
 <p>We can then use the pandas “sum” function to calculate the totals we need for both teams. This is a bit convoluted, but we start by defining which columns we want, then summing them and putting them into a dictionary for each team. We then combine the dictionaries into a list of dictionaries, convert that into dataframe and finally reorder the columns in the dataframe.</p>
+<p>Some of the data we gather here will be used later.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">column_list</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;FGA&#39;</span><span class="p">,</span> <span class="s1">&#39;TO&#39;</span><span class="p">,</span> <span class="s1">&#39;FTA&#39;</span><span class="p">,</span> <span class="s1">&#39;OREB&#39;</span><span class="p">]</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">column_list</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;PTS&#39;</span><span class="p">,</span> <span class="s1">&#39;FGA&#39;</span><span class="p">,</span> <span class="s1">&#39;TO&#39;</span><span class="p">,</span> <span class="s1">&#39;FTA&#39;</span><span class="p">,</span> <span class="s1">&#39;OREB&#39;</span><span class="p">]</span>
 <span class="c1"># Create the dictionaries and add the team name to the dictionary</span>
 <span class="n">hatters_totals</span> <span class="o">=</span> <span class="n">hatters_df</span><span class="p">[</span><span class="n">column_list</span><span class="p">]</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span>
 <span class="n">hatters_totals</span><span class="p">[</span><span class="s1">&#39;Team&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;Hatters&#39;</span>
 <span class="n">glads_totals</span> <span class="o">=</span> <span class="n">glads_df</span><span class="p">[</span><span class="n">column_list</span><span class="p">]</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span>
 <span class="n">glads_totals</span><span class="p">[</span><span class="s1">&#39;Team&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;Gladiators&#39;</span>
 
+<span class="n">hatters_totals</span><span class="p">[</span><span class="s1">&#39;PTS_Allowed&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">glads_totals</span><span class="p">[</span><span class="s1">&#39;PTS&#39;</span><span class="p">]</span>
+<span class="n">glads_totals</span><span class="p">[</span><span class="s1">&#39;PTS_Allowed&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">hatters_totals</span><span class="p">[</span><span class="s1">&#39;PTS&#39;</span><span class="p">]</span>
+
 <span class="c1"># Make a list of dictionaries, then combine into a dataframe</span>
 <span class="n">totals</span><span class="o">=</span><span class="p">[</span><span class="n">hatters_totals</span><span class="p">,</span> <span class="n">glads_totals</span><span class="p">]</span>
 <span class="n">totals_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">totals</span><span class="p">)</span>
 
 <span class="c1"># Rearrange the dataframe</span>
-<span class="n">totals_df</span> <span class="o">=</span> <span class="n">totals_df</span><span class="p">[[</span><span class="s1">&#39;Team&#39;</span><span class="p">,</span> <span class="s1">&#39;FGA&#39;</span><span class="p">,</span> <span class="s1">&#39;TO&#39;</span><span class="p">,</span> <span class="s1">&#39;FTA&#39;</span><span class="p">,</span> <span class="s1">&#39;OREB&#39;</span><span class="p">]]</span>
+<span class="n">totals_df</span> <span class="o">=</span> <span class="n">totals_df</span><span class="p">[[</span><span class="s1">&#39;Team&#39;</span><span class="p">,</span> <span class="s1">&#39;PTS&#39;</span><span class="p">,</span> <span class="s1">&#39;PTS_Allowed&#39;</span><span class="p">,</span><span class="s1">&#39;FGA&#39;</span><span class="p">,</span> <span class="s1">&#39;TO&#39;</span><span class="p">,</span> <span class="s1">&#39;FTA&#39;</span><span class="p">,</span> <span class="s1">&#39;OREB&#39;</span><span class="p">]]</span>
 
 <span class="c1"># What does this look like?</span>
 <span class="n">totals_df</span>
@@ -1860,6 +1866,8 @@ $<span class="math notranslate nohighlight">\(\mathrm{Possessions} = 0.96 \times
     <tr style="text-align: right;">
       <th></th>
       <th>Team</th>
+      <th>PTS</th>
+      <th>PTS_Allowed</th>
       <th>FGA</th>
       <th>TO</th>
       <th>FTA</th>
@@ -1870,6 +1878,8 @@ $<span class="math notranslate nohighlight">\(\mathrm{Possessions} = 0.96 \times
     <tr>
       <th>0</th>
       <td>Hatters</td>
+      <td>86</td>
+      <td>76</td>
       <td>59</td>
       <td>21</td>
       <td>27</td>
@@ -1878,6 +1888,8 @@ $<span class="math notranslate nohighlight">\(\mathrm{Possessions} = 0.96 \times
     <tr>
       <th>1</th>
       <td>Gladiators</td>
+      <td>76</td>
+      <td>86</td>
       <td>63</td>
       <td>21</td>
       <td>18</td>
@@ -1887,13 +1899,14 @@ $<span class="math notranslate nohighlight">\(\mathrm{Possessions} = 0.96 \times
 </table>
 </div></div></div>
 </div>
-<p>We now define a function to calculate the number of possessions. As we want an integer number of possessions, we will round this to the nearest value.</p>
+<p>We now define a function to calculate the number of possessions.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">possessions</span><span class="p">(</span><span class="n">fga</span><span class="p">,</span> <span class="n">to</span><span class="p">,</span> <span class="n">fta</span><span class="p">,</span> <span class="n">oreb</span><span class="p">):</span>
     <span class="n">possessions</span> <span class="o">=</span> <span class="mf">0.96</span> <span class="o">*</span> <span class="p">(</span><span class="n">fga</span> <span class="o">+</span> <span class="n">to</span> <span class="o">+</span> <span class="mf">0.44</span><span class="o">*</span><span class="n">fta</span> <span class="o">-</span> <span class="n">oreb</span><span class="p">)</span>
 
-    <span class="k">return</span> <span class="nb">round</span><span class="p">(</span><span class="n">possessions</span><span class="p">)</span>
+<span class="c1">#    return round(possessions)</span>
+    <span class="k">return</span> <span class="n">possessions</span>
 </pre></div>
 </div>
 </div>
@@ -1934,6 +1947,8 @@ $<span class="math notranslate nohighlight">\(\mathrm{Possessions} = 0.96 \times
     <tr style="text-align: right;">
       <th></th>
       <th>Team</th>
+      <th>PTS</th>
+      <th>PTS_Allowed</th>
       <th>FGA</th>
       <th>TO</th>
       <th>FTA</th>
@@ -1945,26 +1960,116 @@ $<span class="math notranslate nohighlight">\(\mathrm{Possessions} = 0.96 \times
     <tr>
       <th>0</th>
       <td>Hatters</td>
+      <td>86</td>
+      <td>76</td>
       <td>59</td>
       <td>21</td>
       <td>27</td>
       <td>9</td>
-      <td>80</td>
+      <td>79.5648</td>
     </tr>
     <tr>
       <th>1</th>
       <td>Gladiators</td>
+      <td>76</td>
+      <td>86</td>
       <td>63</td>
       <td>21</td>
       <td>18</td>
       <td>13</td>
-      <td>76</td>
+      <td>75.7632</td>
     </tr>
   </tbody>
 </table>
 </div></div></div>
 </div>
-<p>We can see that the Hatters had slightly more possessions, which seems to have come from the number of trips to the free-throw line they had.</p>
+<p>We can see that the Hatters had slightly more estimated possessions, which seems to have come from the number of trips to the free-throw line they had.</p>
+</section>
+<section id="offensive-efficiency-rating">
+<h3>Offensive efficiency rating<a class="headerlink" href="#offensive-efficiency-rating" title="Link to this heading">#</a></h3>
+<p>The offensive efficiency rating, or OER, is the number of points the team scored per 100 possessions.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">oer</span><span class="p">(</span><span class="n">pts</span><span class="p">,</span> <span class="n">possessions</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">pts</span><span class="o">/</span><span class="n">possessions</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">totals_df</span><span class="p">[</span><span class="s1">&#39;OER&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">totals_df</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">oer</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="s1">&#39;PTS&#39;</span><span class="p">],</span> 
+                                            <span class="n">x</span><span class="p">[</span><span class="s1">&#39;Possessions&#39;</span><span class="p">]),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">totals_df</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>Team</th>
+      <th>PTS</th>
+      <th>PTS_Allowed</th>
+      <th>FGA</th>
+      <th>TO</th>
+      <th>FTA</th>
+      <th>OREB</th>
+      <th>Possessions</th>
+      <th>OER</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>Hatters</td>
+      <td>86</td>
+      <td>76</td>
+      <td>59</td>
+      <td>21</td>
+      <td>27</td>
+      <td>9</td>
+      <td>79.5648</td>
+      <td>1.080880</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>Gladiators</td>
+      <td>76</td>
+      <td>86</td>
+      <td>63</td>
+      <td>21</td>
+      <td>18</td>
+      <td>13</td>
+      <td>75.7632</td>
+      <td>1.003126</td>
+    </tr>
+  </tbody>
+</table>
+</div></div></div>
+</div>
+<p>This shows us that the Hatters scored 108 points per 100 possessions, where the Gladiators scored 100.</p>
 </section>
 </section>
 </section>
@@ -2041,6 +2146,7 @@ $<span class="math notranslate nohighlight">\(\mathrm{Possessions} = 0.96 \times
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#team-level-stats">Team-level stats</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#possessions">Possessions</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#offensive-efficiency-rating">Offensive efficiency rating</a></li>
 </ul>
 </li>
 </ul>
