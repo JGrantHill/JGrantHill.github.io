@@ -392,6 +392,9 @@ document.write(`
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#team-level-stats">Team-level stats</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#possessions">Possessions</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#offensive-efficiency-rating">Offensive efficiency rating</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#defensive-efficiency-rating">Defensive efficiency rating</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#net-rating">Net rating</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#pace">Pace</a></li>
 </ul>
 </li>
 </ul>
@@ -412,6 +415,7 @@ document.write(`
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">import</span> <span class="nn">datetime</span> <span class="k">as</span> <span class="nn">dt</span>
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
 </pre></div>
@@ -1804,14 +1808,182 @@ Name: TS%, dtype: float64
 <section id="team-level-stats">
 <h2>Team-level stats<a class="headerlink" href="#team-level-stats" title="Link to this heading">#</a></h2>
 <p>When looking at player-level stats, they are automatically “normalised” by virtue of them being “per game”. However, we sometimes also normalise by looking at what the contribution would have been if the player had played for 40 minutes (“per 40”), giving some insights into how a given player who didn’t play for large stretches of the game might have done if they saw more court time.</p>
-<p>In a similar fashion, while we can look at team-level stats for a given game, it can be useful to normalise them in a different way. This leads us to…</p>
+<p>For some team-level stats, it will be useful to know how much time was played in total (team minutes). While for a normal game this will be 200 minutes (40 minutes for 5 players), if we want to have workflows that work for any game we also need to account for overtime. The first step in this is to convert the Minutes:Seconds format of the time to be in seconds.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">get_total_seconds</span><span class="p">(</span><span class="n">stringMS</span><span class="p">):</span>
+    <span class="n">time_Obj</span> <span class="o">=</span> <span class="n">dt</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">strptime</span><span class="p">(</span><span class="n">stringMS</span><span class="p">,</span> <span class="s2">&quot;%M:%S&quot;</span><span class="p">)</span> <span class="o">-</span> <span class="n">dt</span><span class="o">.</span><span class="n">datetime</span><span class="p">(</span><span class="mi">1900</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">time_Obj</span><span class="o">.</span><span class="n">total_seconds</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">boxscores_df</span><span class="p">[</span><span class="s1">&#39;Seconds&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">boxscores_df</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">get_total_seconds</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="s1">&#39;Mins&#39;</span><span class="p">]),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>We can pull out the relevant columns from the dataframe to make sure this looks sensible.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">boxscores_df</span><span class="p">[[</span><span class="s1">&#39;Name&#39;</span><span class="p">,</span> <span class="s1">&#39;Team&#39;</span><span class="p">,</span> <span class="s1">&#39;Seconds&#39;</span><span class="p">]]</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>Name</th>
+      <th>Team</th>
+      <th>Seconds</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>L. Zolper</td>
+      <td>Hatters</td>
+      <td>1740.0</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>G. Gayle</td>
+      <td>Hatters</td>
+      <td>1435.0</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>N. Krisper</td>
+      <td>Hatters</td>
+      <td>2017.0</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>M. Washington</td>
+      <td>Hatters</td>
+      <td>1896.0</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>E. Gandini</td>
+      <td>Hatters</td>
+      <td>1230.0</td>
+    </tr>
+    <tr>
+      <th>5</th>
+      <td>M. Emanuel-Carr</td>
+      <td>Hatters</td>
+      <td>661.0</td>
+    </tr>
+    <tr>
+      <th>6</th>
+      <td>C. Drennan</td>
+      <td>Hatters</td>
+      <td>1093.0</td>
+    </tr>
+    <tr>
+      <th>7</th>
+      <td>E. Nibbelink</td>
+      <td>Hatters</td>
+      <td>317.0</td>
+    </tr>
+    <tr>
+      <th>8</th>
+      <td>S. Harrison</td>
+      <td>Hatters</td>
+      <td>1041.0</td>
+    </tr>
+    <tr>
+      <th>9</th>
+      <td>L. Wright-Ponder</td>
+      <td>Hatters</td>
+      <td>570.0</td>
+    </tr>
+    <tr>
+      <th>10</th>
+      <td>M. Domenger</td>
+      <td>Gladiators</td>
+      <td>1367.0</td>
+    </tr>
+    <tr>
+      <th>11</th>
+      <td>H. Robb</td>
+      <td>Gladiators</td>
+      <td>1423.0</td>
+    </tr>
+    <tr>
+      <th>12</th>
+      <td>E. Mcgarrachan</td>
+      <td>Gladiators</td>
+      <td>1872.0</td>
+    </tr>
+    <tr>
+      <th>13</th>
+      <td>K. Tudor</td>
+      <td>Gladiators</td>
+      <td>1841.0</td>
+    </tr>
+    <tr>
+      <th>14</th>
+      <td>K. Brown</td>
+      <td>Gladiators</td>
+      <td>1277.0</td>
+    </tr>
+    <tr>
+      <th>15</th>
+      <td>R. Lewis</td>
+      <td>Gladiators</td>
+      <td>948.0</td>
+    </tr>
+    <tr>
+      <th>16</th>
+      <td>T. Adams</td>
+      <td>Gladiators</td>
+      <td>1296.0</td>
+    </tr>
+    <tr>
+      <th>17</th>
+      <td>D. Bryne</td>
+      <td>Gladiators</td>
+      <td>1641.0</td>
+    </tr>
+    <tr>
+      <th>18</th>
+      <td>K. Mcghee</td>
+      <td>Gladiators</td>
+      <td>335.0</td>
+    </tr>
+  </tbody>
+</table>
+</div></div></div>
+</div>
+<p>We will come back to these times a little later. When we look at team-level stats for a given game, it can be useful to normalise them in a different way than the “per 40” than they already are (assuming no overtime). This leads us to…</p>
 <section id="possessions">
 <h3>Possessions<a class="headerlink" href="#possessions" title="Link to this heading">#</a></h3>
 <p>The concept of breaking the game down into “possessions” has been around a long time, with Dean Oliver mentioning that he saw it in a book by Frank McGuire (interestingly, Oliver mentions that he originally thought he’d invented the concept until he found it elsewhere). The general principle is that a team alternates possessions with the opponent and the two teams will end up with roughly the same number of possessions over the course of a game. It is not simply the number of shots as it needs to account for offensive rebounds (i.e., the team on offence still has possession), turnovers commited etc. The number of possessions in a game will also give you some indication of the pace of play - teams playing fast end up with a lot of possessions.</p>
 <p>There are various formulae used to estimate the number of possessions based on team-level stats, with varying degress of complexity. The one we will use here is:</p>
 <div class="math notranslate nohighlight">
 \[\mathrm{Possessions} = 0.96 \times \left(\mathrm{FGA} + \mathrm{TO} + 0.44 \times \mathrm{FTA} - \mathrm{OREB}\right)\]</div>
-<p>To be able to calculate this, we are going to need to sum the player-level stats on a per-team basis. One way to approach this is to create individual dataframes for each team.</p>
+<p>To be able to calculate this, we are going to need to sum the player-level stats on a per-team basis.</p>
+<p>Some of the data we gather here will be used later, so stick with it if it doesn’t seem totally obvious at this point. We start by creating individual dataframes for each team by pulling out the relevant rows of the boxscores.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">hatters_df</span> <span class="o">=</span> <span class="n">boxscores_df</span><span class="p">[</span><span class="n">boxscores_df</span><span class="p">[</span><span class="s1">&#39;Team&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;Hatters&#39;</span><span class="p">]</span>
@@ -1820,28 +1992,41 @@ Name: TS%, dtype: float64
 </div>
 </div>
 </div>
-<p>We can then use the pandas “sum” function to calculate the totals we need for both teams. This is a bit convoluted, but we start by defining which columns we want, then summing them and putting them into a dictionary for each team. We then combine the dictionaries into a list of dictionaries, convert that into dataframe and finally reorder the columns in the dataframe.</p>
-<p>Some of the data we gather here will be used later.</p>
+<p>We can then use the pandas “sum” function to calculate the totals we need for both teams. This is a bit convoluted, but we start by defining which columns we want.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">column_list</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;PTS&#39;</span><span class="p">,</span> <span class="s1">&#39;FGA&#39;</span><span class="p">,</span> <span class="s1">&#39;TO&#39;</span><span class="p">,</span> <span class="s1">&#39;FTA&#39;</span><span class="p">,</span> <span class="s1">&#39;OREB&#39;</span><span class="p">]</span>
-<span class="c1"># Create the dictionaries and add the team name to the dictionary</span>
-<span class="n">hatters_totals</span> <span class="o">=</span> <span class="n">hatters_df</span><span class="p">[</span><span class="n">column_list</span><span class="p">]</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">column_list</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Seconds&#39;</span><span class="p">,</span> <span class="s1">&#39;PTS&#39;</span><span class="p">,</span> <span class="s1">&#39;FGA&#39;</span><span class="p">,</span> <span class="s1">&#39;TO&#39;</span><span class="p">,</span> <span class="s1">&#39;FTA&#39;</span><span class="p">,</span> <span class="s1">&#39;OREB&#39;</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>We then sum these columns and add them to a dictionary for each team. We also add the team names and the number of points allowed (that is, how many points the other team scored) to these dictionaries.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">hatters_totals</span> <span class="o">=</span> <span class="n">hatters_df</span><span class="p">[</span><span class="n">column_list</span><span class="p">]</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span>
 <span class="n">hatters_totals</span><span class="p">[</span><span class="s1">&#39;Team&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;Hatters&#39;</span>
 <span class="n">glads_totals</span> <span class="o">=</span> <span class="n">glads_df</span><span class="p">[</span><span class="n">column_list</span><span class="p">]</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span>
 <span class="n">glads_totals</span><span class="p">[</span><span class="s1">&#39;Team&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;Gladiators&#39;</span>
 
 <span class="n">hatters_totals</span><span class="p">[</span><span class="s1">&#39;PTS_Allowed&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">glads_totals</span><span class="p">[</span><span class="s1">&#39;PTS&#39;</span><span class="p">]</span>
 <span class="n">glads_totals</span><span class="p">[</span><span class="s1">&#39;PTS_Allowed&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">hatters_totals</span><span class="p">[</span><span class="s1">&#39;PTS&#39;</span><span class="p">]</span>
-
-<span class="c1"># Make a list of dictionaries, then combine into a dataframe</span>
-<span class="n">totals</span><span class="o">=</span><span class="p">[</span><span class="n">hatters_totals</span><span class="p">,</span> <span class="n">glads_totals</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>We then combine the dictionaries into a list of dictionaries and then convert that into dataframe</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">totals</span><span class="o">=</span><span class="p">[</span><span class="n">hatters_totals</span><span class="p">,</span> <span class="n">glads_totals</span><span class="p">]</span>
 <span class="n">totals_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">totals</span><span class="p">)</span>
-
-<span class="c1"># Rearrange the dataframe</span>
-<span class="n">totals_df</span> <span class="o">=</span> <span class="n">totals_df</span><span class="p">[[</span><span class="s1">&#39;Team&#39;</span><span class="p">,</span> <span class="s1">&#39;PTS&#39;</span><span class="p">,</span> <span class="s1">&#39;PTS_Allowed&#39;</span><span class="p">,</span><span class="s1">&#39;FGA&#39;</span><span class="p">,</span> <span class="s1">&#39;TO&#39;</span><span class="p">,</span> <span class="s1">&#39;FTA&#39;</span><span class="p">,</span> <span class="s1">&#39;OREB&#39;</span><span class="p">]]</span>
-
-<span class="c1"># What does this look like?</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>Now we re-arrange the dataframe and see what it looks like.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">totals_df</span> <span class="o">=</span> <span class="n">totals_df</span><span class="p">[[</span><span class="s1">&#39;Team&#39;</span><span class="p">,</span> <span class="s1">&#39;Seconds&#39;</span><span class="p">,</span> <span class="s1">&#39;PTS&#39;</span><span class="p">,</span> <span class="s1">&#39;PTS_Allowed&#39;</span><span class="p">,</span><span class="s1">&#39;FGA&#39;</span><span class="p">,</span> <span class="s1">&#39;TO&#39;</span><span class="p">,</span> <span class="s1">&#39;FTA&#39;</span><span class="p">,</span> <span class="s1">&#39;OREB&#39;</span><span class="p">]]</span>
 <span class="n">totals_df</span>
 </pre></div>
 </div>
@@ -1866,6 +2051,7 @@ Name: TS%, dtype: float64
     <tr style="text-align: right;">
       <th></th>
       <th>Team</th>
+      <th>Seconds</th>
       <th>PTS</th>
       <th>PTS_Allowed</th>
       <th>FGA</th>
@@ -1878,34 +2064,115 @@ Name: TS%, dtype: float64
     <tr>
       <th>0</th>
       <td>Hatters</td>
-      <td>86</td>
-      <td>76</td>
-      <td>59</td>
-      <td>21</td>
-      <td>27</td>
-      <td>9</td>
+      <td>12000.0</td>
+      <td>86.0</td>
+      <td>76.0</td>
+      <td>59.0</td>
+      <td>21.0</td>
+      <td>27.0</td>
+      <td>9.0</td>
     </tr>
     <tr>
       <th>1</th>
       <td>Gladiators</td>
-      <td>76</td>
-      <td>86</td>
-      <td>63</td>
-      <td>21</td>
-      <td>18</td>
-      <td>13</td>
+      <td>12000.0</td>
+      <td>76.0</td>
+      <td>86.0</td>
+      <td>63.0</td>
+      <td>21.0</td>
+      <td>18.0</td>
+      <td>13.0</td>
     </tr>
   </tbody>
 </table>
 </div></div></div>
 </div>
+<p>The seconds part looks a bit odd, so let’s convert that back to the Mins:Secs format now that it has been summed.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">seconds_to_minsseconds</span><span class="p">(</span><span class="n">seconds</span><span class="p">):</span>
+    <span class="k">return</span> <span class="s1">&#39;</span><span class="si">{}</span><span class="s1">:</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="o">*</span><span class="nb">divmod</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">seconds</span><span class="p">),</span> <span class="mi">60</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">totals_df</span><span class="p">[</span><span class="s1">&#39;Mins&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">totals_df</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">seconds_to_minsseconds</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="s1">&#39;Seconds&#39;</span><span class="p">]),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">totals_df</span> <span class="o">=</span> <span class="n">totals_df</span><span class="p">[[</span><span class="s1">&#39;Team&#39;</span><span class="p">,</span> <span class="s1">&#39;Mins&#39;</span><span class="p">,</span> <span class="s1">&#39;PTS&#39;</span><span class="p">,</span> <span class="s1">&#39;PTS_Allowed&#39;</span><span class="p">,</span><span class="s1">&#39;FGA&#39;</span><span class="p">,</span> <span class="s1">&#39;TO&#39;</span><span class="p">,</span> <span class="s1">&#39;FTA&#39;</span><span class="p">,</span> <span class="s1">&#39;OREB&#39;</span><span class="p">]]</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">totals_df</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>Team</th>
+      <th>Mins</th>
+      <th>PTS</th>
+      <th>PTS_Allowed</th>
+      <th>FGA</th>
+      <th>TO</th>
+      <th>FTA</th>
+      <th>OREB</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>Hatters</td>
+      <td>200:0</td>
+      <td>86.0</td>
+      <td>76.0</td>
+      <td>59.0</td>
+      <td>21.0</td>
+      <td>27.0</td>
+      <td>9.0</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>Gladiators</td>
+      <td>200:0</td>
+      <td>76.0</td>
+      <td>86.0</td>
+      <td>63.0</td>
+      <td>21.0</td>
+      <td>18.0</td>
+      <td>13.0</td>
+    </tr>
+  </tbody>
+</table>
+</div></div></div>
+</div>
+<p>That looks better, each team has played the 200 minutes we would expect for a normal length game (no O/T).</p>
 <p>We now define a function to calculate the number of possessions.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">possessions</span><span class="p">(</span><span class="n">fga</span><span class="p">,</span> <span class="n">to</span><span class="p">,</span> <span class="n">fta</span><span class="p">,</span> <span class="n">oreb</span><span class="p">):</span>
     <span class="n">possessions</span> <span class="o">=</span> <span class="mf">0.96</span> <span class="o">*</span> <span class="p">(</span><span class="n">fga</span> <span class="o">+</span> <span class="n">to</span> <span class="o">+</span> <span class="mf">0.44</span><span class="o">*</span><span class="n">fta</span> <span class="o">-</span> <span class="n">oreb</span><span class="p">)</span>
 
-<span class="c1">#    return round(possessions)</span>
     <span class="k">return</span> <span class="n">possessions</span>
 </pre></div>
 </div>
@@ -1947,6 +2214,7 @@ Name: TS%, dtype: float64
     <tr style="text-align: right;">
       <th></th>
       <th>Team</th>
+      <th>Mins</th>
       <th>PTS</th>
       <th>PTS_Allowed</th>
       <th>FGA</th>
@@ -1960,23 +2228,25 @@ Name: TS%, dtype: float64
     <tr>
       <th>0</th>
       <td>Hatters</td>
-      <td>86</td>
-      <td>76</td>
-      <td>59</td>
-      <td>21</td>
-      <td>27</td>
-      <td>9</td>
+      <td>200:0</td>
+      <td>86.0</td>
+      <td>76.0</td>
+      <td>59.0</td>
+      <td>21.0</td>
+      <td>27.0</td>
+      <td>9.0</td>
       <td>79.5648</td>
     </tr>
     <tr>
       <th>1</th>
       <td>Gladiators</td>
-      <td>76</td>
-      <td>86</td>
-      <td>63</td>
-      <td>21</td>
-      <td>18</td>
-      <td>13</td>
+      <td>200:0</td>
+      <td>76.0</td>
+      <td>86.0</td>
+      <td>63.0</td>
+      <td>21.0</td>
+      <td>18.0</td>
+      <td>13.0</td>
       <td>75.7632</td>
     </tr>
   </tbody>
@@ -1991,7 +2261,7 @@ Name: TS%, dtype: float64
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">oer</span><span class="p">(</span><span class="n">pts</span><span class="p">,</span> <span class="n">possessions</span><span class="p">):</span>
-    <span class="k">return</span> <span class="n">pts</span><span class="o">/</span><span class="n">possessions</span>
+    <span class="k">return</span> <span class="mi">100</span> <span class="o">*</span> <span class="p">(</span><span class="n">pts</span><span class="o">/</span><span class="n">possessions</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -2030,6 +2300,7 @@ Name: TS%, dtype: float64
     <tr style="text-align: right;">
       <th></th>
       <th>Team</th>
+      <th>Mins</th>
       <th>PTS</th>
       <th>PTS_Allowed</th>
       <th>FGA</th>
@@ -2044,32 +2315,231 @@ Name: TS%, dtype: float64
     <tr>
       <th>0</th>
       <td>Hatters</td>
-      <td>86</td>
-      <td>76</td>
-      <td>59</td>
-      <td>21</td>
-      <td>27</td>
-      <td>9</td>
+      <td>200:0</td>
+      <td>86.0</td>
+      <td>76.0</td>
+      <td>59.0</td>
+      <td>21.0</td>
+      <td>27.0</td>
+      <td>9.0</td>
       <td>79.5648</td>
-      <td>1.080880</td>
+      <td>108.087999</td>
     </tr>
     <tr>
       <th>1</th>
       <td>Gladiators</td>
-      <td>76</td>
-      <td>86</td>
-      <td>63</td>
-      <td>21</td>
-      <td>18</td>
-      <td>13</td>
+      <td>200:0</td>
+      <td>76.0</td>
+      <td>86.0</td>
+      <td>63.0</td>
+      <td>21.0</td>
+      <td>18.0</td>
+      <td>13.0</td>
       <td>75.7632</td>
-      <td>1.003126</td>
+      <td>100.312553</td>
     </tr>
   </tbody>
 </table>
 </div></div></div>
 </div>
-<p>This shows us that the Hatters scored 108 points per 100 possessions, where the Gladiators scored 100.</p>
+<p>This shows us that the Hatters scored 108 points per 100 possessions, where the Gladiators scored 100. Interestingly, basketball is a game where usually a team scores an average of about 1 point per possession. This leads to lots of analysis of how many points a player scores on different types of possession, for example how many on average do they score per post-up.</p>
+<p>However, we’re looking at team-level stats here, so let’s not get too distracted.</p>
+</section>
+<section id="defensive-efficiency-rating">
+<h3>Defensive efficiency rating<a class="headerlink" href="#defensive-efficiency-rating" title="Link to this heading">#</a></h3>
+<p>Perhaps unsurprisingly, the defensive efficiency rating (DER) is the number of points allowed per 100 possessions.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">der</span><span class="p">(</span><span class="n">pts_allowed</span><span class="p">,</span> <span class="n">possessions</span><span class="p">):</span>
+    <span class="k">return</span> <span class="mi">100</span> <span class="o">*</span> <span class="p">(</span><span class="n">pts_allowed</span><span class="o">/</span><span class="n">possessions</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">totals_df</span><span class="p">[</span><span class="s1">&#39;DER&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">totals_df</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">der</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="s1">&#39;PTS_Allowed&#39;</span><span class="p">],</span> 
+                                            <span class="n">x</span><span class="p">[</span><span class="s1">&#39;Possessions&#39;</span><span class="p">]),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">totals_df</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>Team</th>
+      <th>Mins</th>
+      <th>PTS</th>
+      <th>PTS_Allowed</th>
+      <th>FGA</th>
+      <th>TO</th>
+      <th>FTA</th>
+      <th>OREB</th>
+      <th>Possessions</th>
+      <th>OER</th>
+      <th>DER</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>Hatters</td>
+      <td>200:0</td>
+      <td>86.0</td>
+      <td>76.0</td>
+      <td>59.0</td>
+      <td>21.0</td>
+      <td>27.0</td>
+      <td>9.0</td>
+      <td>79.5648</td>
+      <td>108.087999</td>
+      <td>95.519627</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>Gladiators</td>
+      <td>200:0</td>
+      <td>76.0</td>
+      <td>86.0</td>
+      <td>63.0</td>
+      <td>21.0</td>
+      <td>18.0</td>
+      <td>13.0</td>
+      <td>75.7632</td>
+      <td>100.312553</td>
+      <td>113.511573</td>
+    </tr>
+  </tbody>
+</table>
+</div></div></div>
+</div>
+<p>Rather than analysing the DER, we can jump straight to an overall rating.</p>
+</section>
+<section id="net-rating">
+<h3>Net rating<a class="headerlink" href="#net-rating" title="Link to this heading">#</a></h3>
+<p>The net rating (NET) is simply the difference between OER and DER.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">net</span><span class="p">(</span><span class="n">oer</span><span class="p">,</span> <span class="n">der</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">oer</span> <span class="o">-</span> <span class="n">der</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">totals_df</span><span class="p">[</span><span class="s1">&#39;NET&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">totals_df</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">net</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="s1">&#39;OER&#39;</span><span class="p">],</span> 
+                                            <span class="n">x</span><span class="p">[</span><span class="s1">&#39;DER&#39;</span><span class="p">]),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">totals_df</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>Team</th>
+      <th>Mins</th>
+      <th>PTS</th>
+      <th>PTS_Allowed</th>
+      <th>FGA</th>
+      <th>TO</th>
+      <th>FTA</th>
+      <th>OREB</th>
+      <th>Possessions</th>
+      <th>OER</th>
+      <th>DER</th>
+      <th>NET</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>Hatters</td>
+      <td>200:0</td>
+      <td>86.0</td>
+      <td>76.0</td>
+      <td>59.0</td>
+      <td>21.0</td>
+      <td>27.0</td>
+      <td>9.0</td>
+      <td>79.5648</td>
+      <td>108.087999</td>
+      <td>95.519627</td>
+      <td>12.568372</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>Gladiators</td>
+      <td>200:0</td>
+      <td>76.0</td>
+      <td>86.0</td>
+      <td>63.0</td>
+      <td>21.0</td>
+      <td>18.0</td>
+      <td>13.0</td>
+      <td>75.7632</td>
+      <td>100.312553</td>
+      <td>113.511573</td>
+      <td>-13.199020</td>
+    </tr>
+  </tbody>
+</table>
+</div></div></div>
+</div>
+<p>It’s probably best not to read too much into this, but the NET ratings do suggest that if the game had been 100 possessions, the Hatters should have won by about 13 points (rather than the 10 points from 76 to 80 possessions).</p>
+<p>Once you start to average NET over several games, it should give an idea of which teams are playing well, and which are not. As a basic “rule-of-thumb”, teams with a positive net rating are “good” and those with a negative rating are not.</p>
+</section>
+<section id="pace">
+<h3>Pace<a class="headerlink" href="#pace" title="Link to this heading">#</a></h3>
+<p>Pace is the total number of possessions each team uses in a game - as the name suggests, it gives an indication of how quick the team is playing and is another statistic that makes more sense to average over multiple games.</p>
+<p>It is calculated as:</p>
+<div class="math notranslate nohighlight">
+\[\mathrm{Pace} = \frac{200}{\mathrm{Team Mins}} \times \frac{\mathrm{Possessions} + \mathrm{Opponent Possessions}}{2}\]</div>
+<p>Inspecting the equation tells us that the first term accounts for any overtime played, while the second takes the average of the game’s possessions.</p>
 </section>
 </section>
 </section>
@@ -2147,6 +2617,9 @@ Name: TS%, dtype: float64
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#team-level-stats">Team-level stats</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#possessions">Possessions</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#offensive-efficiency-rating">Offensive efficiency rating</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#defensive-efficiency-rating">Defensive efficiency rating</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#net-rating">Net rating</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#pace">Pace</a></li>
 </ul>
 </li>
 </ul>
