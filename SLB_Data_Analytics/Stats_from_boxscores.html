@@ -395,6 +395,7 @@ document.write(`
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#defensive-efficiency-rating">Defensive efficiency rating</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#net-rating">Net rating</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#pace">Pace</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id1">Exercises</a></li>
 </ul>
 </li>
 </ul>
@@ -410,7 +411,7 @@ document.write(`
                   
   <section class="tex2jax_ignore mathjax_ignore" id="calculating-statistics-from-boxscores">
 <h1>Calculating statistics from boxscores<a class="headerlink" href="#calculating-statistics-from-boxscores" title="Link to this heading">#</a></h1>
-<p>This Chapter is currently a work in progress preview.</p>
+<p>While boxscores record the important on-court actions in a convenient way, to analyse both player and team performance, it is useful to calculate more advanced statistics. The aim of this Chapter is to calculate some advanced stats from the data in a boxscore CSV file, and carry out some analysis of these stats.</p>
 <p>As usual, we start by importing the modules and libraries we will need.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
@@ -2539,7 +2540,112 @@ Name: TS%, dtype: float64
 <p>It is calculated as:</p>
 <div class="math notranslate nohighlight">
 \[\mathrm{Pace} = \frac{200}{\mathrm{Team Mins}} \times \frac{\mathrm{Possessions} + \mathrm{Opponent Possessions}}{2}\]</div>
-<p>Inspecting the equation tells us that the first term accounts for any overtime played, while the second takes the average of the game’s possessions.</p>
+<p>Inspecting the equation tells us that the first term accounts for any overtime played, while the second takes the average of the game’s possessions. It’s also clear the the pace will be the same for both teams in a given game.</p>
+<p>We can work it out as a single calculation, rather than defining a function.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">pace</span> <span class="o">=</span> <span class="p">(</span><span class="mi">200</span> <span class="o">/</span> <span class="nb">int</span><span class="p">(</span><span class="n">totals_df</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;Mins&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;:&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]))</span> <span class="o">*</span> <span class="p">((</span><span class="n">totals_df</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;Possessions&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="n">totals_df</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="s1">&#39;Possessions&#39;</span><span class="p">])</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span>
+<span class="n">pace</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>77.66399999999999
+</pre></div>
+</div>
+</div>
+</div>
+<p>To add this to the dataframe, we create a list that contains the pace twice (once for each team), then add the list to the dataframe as a new column.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">pace_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">pace</span><span class="p">,</span> <span class="n">pace</span><span class="p">]</span>
+<span class="n">totals_df</span><span class="p">[</span><span class="s1">&#39;Pace&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">pace_list</span>
+<span class="n">totals_df</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>Team</th>
+      <th>Mins</th>
+      <th>PTS</th>
+      <th>PTS_Allowed</th>
+      <th>FGA</th>
+      <th>TO</th>
+      <th>FTA</th>
+      <th>OREB</th>
+      <th>Possessions</th>
+      <th>OER</th>
+      <th>DER</th>
+      <th>NET</th>
+      <th>Pace</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>Hatters</td>
+      <td>200:0</td>
+      <td>86.0</td>
+      <td>76.0</td>
+      <td>59.0</td>
+      <td>21.0</td>
+      <td>27.0</td>
+      <td>9.0</td>
+      <td>79.5648</td>
+      <td>108.087999</td>
+      <td>95.519627</td>
+      <td>12.568372</td>
+      <td>77.664</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>Gladiators</td>
+      <td>200:0</td>
+      <td>76.0</td>
+      <td>86.0</td>
+      <td>63.0</td>
+      <td>21.0</td>
+      <td>18.0</td>
+      <td>13.0</td>
+      <td>75.7632</td>
+      <td>100.312553</td>
+      <td>113.511573</td>
+      <td>-13.199020</td>
+      <td>77.664</td>
+    </tr>
+  </tbody>
+</table>
+</div></div></div>
+</div>
+<p>As you can probably tell, pace is a stat that should be tracked over the course of several games as it doesn’t provide many performance insights on its own.</p>
+</section>
+<section id="id1">
+<h3>Exercises<a class="headerlink" href="#id1" title="Link to this heading">#</a></h3>
+<ol class="arabic simple">
+<li><p>We will get slightly different values of OER, DER and NET if we round the value of Possessions so that it’s an integer. You could explore round the value using the floor, ceiling and round functions to see how it changes things.</p></li>
+<li><p>There’s a more complicated version of the formula for calculating the number of possessions, which is given in Oliver’s Basketball on Paper. Try using the formula below to see if it produces a noticeable difference in OER, DER and NET.</p></li>
+</ol>
+<div class="math notranslate nohighlight">
+\[\mathrm{Possessions} = \mathrm{FGA} - \frac{\mathrm{OREB}}{\mathrm{OREB} + \mathrm{DDREB}} \times \left(\mathrm{FGA} - \mathrm{FGM}\right) \times 1.07 + \mathrm{TO} + 0.4 \times \mathrm{FTA}\]</div>
+<p>where <span class="math notranslate nohighlight">\(\mathrm{DDREB}\)</span> is the number of defensive rebounds that the opposition recorded.</p>
 </section>
 </section>
 </section>
@@ -2620,6 +2726,7 @@ Name: TS%, dtype: float64
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#defensive-efficiency-rating">Defensive efficiency rating</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#net-rating">Net rating</a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#pace">Pace</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id1">Exercises</a></li>
 </ul>
 </li>
 </ul>
